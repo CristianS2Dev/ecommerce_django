@@ -1,0 +1,56 @@
+{% load static humanize custom_filters breadcrumbs %}
+<nav class="sidebar bg-dark text-white p-3 flex-shrink-0" style="width: 250px; min-height: 100vh;">
+    <!-- Lista principal -->
+    <ul class="nav flex-column" id="sidebarMenu">
+        <!-- Panel Productos -->
+        <li class="nav-item">
+            <a class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                href="#productosCollapse" role="button" aria-expanded="false" aria-controls="productosCollapse">
+                <span><i class="fas fa-shopping-bag me-2"></i>Catalogo</span>
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <ul class="collapse list-unstyled" id="productosCollapse">
+                <li><a class="nav-link text-white ms-4" href="{% url 'lista_productos_admin' %}">Lista de Productos</a></li>
+                <li><a class="nav-link text-white ms-4" href="{% url 'agregar_producto' %}">Agregar Producto</a></li>
+                <li><a class="nav-link text-white ms-4" href="{% url 'list_products' %}">Ver Productos</a></li>
+            </ul>
+        </li>
+
+        <!-- Panel Marcas -->
+        <li class="nav-item">
+            <a class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                href="#marcasCollapse" role="button" aria-expanded="false" aria-controls="marcasCollapse">
+                <span><i class="fas fa-tags me-2"></i>Panel Marcas</span>
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <ul class="collapse list-unstyled" id="marcasCollapse">
+                <li><a class="nav-link text-white ms-4" href="{% url 'list_brands' %}">Ver Marcas</a></li>
+                <li><a class="nav-link text-white ms-4" href="{% url 'add_brand' %}">Agregar Marcas</a></li>
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                href="#bannersCollapse" role="button" aria-expanded="false" aria-controls="bannersCollapse">
+                <span><i class="fas fa-images me-2"></i>Panel Banners</span>
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <ul class="collapse list-unstyled" id="bannersCollapse">
+                <li><a class="nav-link text-white ms-4" href="{% url 'list_banners' %}">lista Banners</a></li>
+                <li><a class="nav-link text-white ms-4" href="{% url 'add_banner' %}">Agregar Banner</a></li>
+            </ul>
+        </li>
+
+        <!-- Ítems sin submenú -->
+        <li class="nav-item">
+            <a class="nav-link text-white" href="#">
+                <i class="fas fa-user-circle me-2"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" href="#">
+                <i class="fas fa-cog me-2"></i> Configuración
+            </a>
+        </li>
+    </ul>
+</nav>

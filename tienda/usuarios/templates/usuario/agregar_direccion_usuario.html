@@ -1,0 +1,98 @@
+{% extends '../bases/_base.html' %}
+{% load static humanize custom_filters breadcrumbs %}
+
+
+{% block titulo %}Editar Dirección{% endblock %}
+
+{% block main %}
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    {% render_breadcrumbs breadcrumbs %}
+    <div class="row">
+          <!-- Sidebar -->
+          <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body text-center">
+                    {% if usuario.imagen_perfil %}
+                        <img src="{{ usuario.imagen_perfil.url }}" alt="user"
+                             class="rounded-circle mb-2"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'assets/user-icon.png' %}" alt="user"
+                             class="rounded-circle mb-2"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% endif %}
+                    <h6 class="mb-0">Hello! {{ usuario.nombre }}</h6>
+                    <small class="text-muted">{{ usuario.correo }}</small>
+                </div>
+            </div>
+            
+
+            <h6 class="mb-3">Mi cuenta</h6>
+            <div class="list-group shadow-sm rounded-3">
+                <a href="{% url 'profile' %}" class="list-group-item list-group-item-action ">
+                    <i class="bi bi-person me-2"></i> Perfil
+                </a>
+                <a href="{% url 'address' %}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-geo-alt me-2"></i> Dirección
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-calendar-check me-2"></i> Pedidos
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-star me-2"></i> Reseñas
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-heart me-2"></i> Lista de deseos
+                </a>
+            </div>
+        </div>
+        <div class="col-md-8 col-lg-9 mx-auto">
+            {% if dato %}
+                <h4 class="mb-4">Actualizar Dirección</h4>
+            {% else %}
+            <h4 class="mb-4">Agregar Dirección</h4>
+            {% endif %}
+
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input type="text" id="direccion" name="direccion" class="form-control" value="{{ direccion_valor }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="ciudad" class="form-label">Ciudad</label>
+                    <input type="text" id="ciudad" name="ciudad" class="form-control" value="{{ ciudad_valor }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <input type="text" id="estado" name="estado" class="form-control" value="{{ estado_valor }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="codigo_postal" class="form-label">Código Postal</label>
+                    <input type="text" id="codigo_postal" name="codigo_postal" class="form-control" value="{{ codigo_postal_valor }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="pais" class="form-label">País</label>
+                    <input type="text" id="pais" name="pais" class="form-control" value="{{ pais_valor }}" required>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" id="principal" name="principal" class="form-check-input" {% if principal_valor %}checked{% endif %}>
+                    <label for="principal" class="form-check-label">Establecer como dirección predeterminada</label>
+                </div>
+                <div class="d-flex justify-content-between">
+                    {% if dato %}
+                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                        <a href="{% url 'address' %}" class="btn btn-outline-secondary">Cancelar</a>
+
+                    {% else %}
+                    <a href="{% url 'address' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'bases/_base_admin.html' %}
+
+{% load static humanize custom_filters breadcrumbs %}
+{% block titulo %}Marcas{% endblock %}
+{% block main %}
+<div class="container">
+    <h1> 
+        <a href="{% url 'dashboard_admin' %}" class="btn">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        Lista de marcas
+    </h1>
+   
+    <br>
+    <a href="{% url 'add_brand' %}" class="btn btn-success mb-3">Agregar Marca</a>
+    <table class="table table-bordered table-hover"> 
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Logo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for marca in marcas %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ marca.nombre }}</td>
+                <td>
+                    {% if marca.logo %}
+                    <img src="{{ marca.logo.url }}" alt="{{ marca.nombre }}" style="width: 50px;">
+                    {% else %}
+                    Sin logo
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'editar_marca' marca.id %}" class="btn btn-warning">Editar</a>
+                    <a href="{% url 'eliminar_marca' marca.id %}" class="btn btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

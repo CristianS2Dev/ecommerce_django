@@ -1,0 +1,79 @@
+/* .btn_banner{
+    background-color: #000000;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    
+} */
+
+
+/* Seccion marcas index */
+
+.marca-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  border: 2px solid #ddd;
+  padding: 8px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.marca-item {
+  flex: 0 0 auto;
+  width: 100px;
+}
+
+.marcas-scroll {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.marcas-scroll > .marca-item {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .marcas-scroll {
+    justify-content: space-around;
+  }
+}
+
+
+
+
+/* Seccion 3 index */
+
+.custom-card {
+  border: none;
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #1e1e1e;
+  padding: 30px;
+}
+.custom-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px #f1c307;
+}
+.custom-icon {
+  font-size: 3rem;
+  color: #f1c40f;
+}
+.custom-btn {
+  background: #f1c40f;
+  color: #121212;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+.custom-btn:hover {
+  background: #ecc62e;
+}
+
+
+
+

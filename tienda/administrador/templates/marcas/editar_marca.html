@@ -1,0 +1,27 @@
+{% extends 'bases/_base_admin.html' %}
+
+{% load static humanize custom_filters breadcrumbs %}
+{% block titulo %}Editar Marca{% endblock %}
+{% block main %}
+<div class="container">
+    <a href="{% url 'listar_marcas' %}" class="btn">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+    <h1>Editar Marca</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ marca.nombre }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="logo" class="form-label">Logo</label>
+            <input type="file" class="form-control" id="logo" name="logo">
+            {% if marca.logo %}
+            <img src="{{ marca.logo.url }}" alt="{{ marca.nombre }}" style="width: 100px;">
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-success">Guardar Cambios</button>
+    </form>
+</div>
+{% endblock %}

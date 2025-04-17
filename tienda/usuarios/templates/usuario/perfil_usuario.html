@@ -1,0 +1,90 @@
+{% extends '../bases/_base.html' %}
+{% load static humanize custom_filters breadcrumbs %}
+
+{% block titulo %}Perfil de Usuario{% endblock %}
+
+
+{% block main %}
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    {% render_breadcrumbs breadcrumbs %}
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body text-center">
+                    {% if usuario.imagen_perfil %}
+                        <img src="{{ usuario.imagen_perfil.url }}" alt="user"
+                             class="rounded-circle mb-2"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'assets/user-icon.png' %}" alt="user"
+                             class="rounded-circle mb-2"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% endif %}
+                    <h6 class="mb-0">Hello! {{ usuario.nombre }}</h6>
+                    <small class="text-muted">{{ usuario.correo }}</small>
+                </div>
+            </div>
+            
+
+            <h6 class="mb-3">Mi cuenta</h6>
+            <div class="list-group shadow-sm rounded-3">
+                <a href="{% url 'profile' %}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-person me-2"></i> Perfil
+                </a>
+                <a href="{% url 'address' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-geo-alt me-2"></i> Dirección
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-calendar-check me-2"></i> Pedidos
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-star me-2"></i> Reseñas
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-heart me-2"></i> Lista de deseos
+                </a>
+            </div>
+        </div>
+
+        <!-- Perfil detalle -->
+        <div class="col-md-8 col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Perfil</h4>
+                <a href="{% url 'update_profile' %}" class="btn btn-outline-secondary rounded-pill">Editar</a>
+            </div>
+            <table class="table w-100">
+                <tbody>
+                    <tr>
+                        <th scope="row">Nombre</th>
+                        <td>{{ usuario.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Apellido</th>
+                        <td>{{ usuario.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Género</th>
+                        <td>{{ usuario.get_genero_display|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Fecha de Nacimiento</th>
+                        <td>{{ usuario.fecha_nacimiento|date:"d/m/Y"|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo Electrónico</th>
+                        <td class="text-muted">{{ usuario.correo }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <form method="post" action="{% url 'delete_profile' %}">
+                {% csrf_token %}
+  
+                <button type="submit" class="btn text-light rounded-pill px-4 py-2 mt-4" style="background: linear-gradient(135deg, #ff416c, #ff4b2b);">Eliminar Perfil</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

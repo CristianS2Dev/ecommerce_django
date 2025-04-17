@@ -1,0 +1,43 @@
+{% load static humanize custom_filters breadcrumbs %}
+
+<link rel="stylesheet" href="{% static 'css/login.css' %}" />
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+
+<div class="modal fade" id="registroModal" tabindex="-1" aria-labelledby="registroModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content login-modal">
+            <form action="{% url 'register' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title login-heading w-100 text-center" id="registroModalLabel">Registro de Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input required name="nombre" id="nombre" type="text" class="form-control" placeholder="Ingresa tu nombre">
+                        <label for="nombre">Nombre</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input required name="correo" id="correo" type="email" class="form-control" placeholder="Ingresa tu email">
+                        <label for="correo">Email</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input required name="contrasena" id="contrasena" type="password" class="form-control" placeholder="Ingresa tu contraseña">
+                        <label for="contrasena">Contraseña</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input required name="confirmar_contrasena" id="confirmar_contrasena" type="password" class="form-control" placeholder="Confirma tu contraseña">
+                        <label for="confirmar_contrasena">Confirmar Contraseña</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 flex-column">
+                    <button type="submit" class="btn loginBtn w-100">Registrarse</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>

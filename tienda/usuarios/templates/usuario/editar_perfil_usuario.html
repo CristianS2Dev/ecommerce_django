@@ -1,0 +1,111 @@
+{% extends '../bases/_base.html' %}
+{% load static humanize custom_filters breadcrumbs %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block main %}
+<div class="container my-5">
+        {% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for field, errors in form.errors.items %}
+                <li>{{ field }}: {{ errors|join:", " }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+     <!-- Breadcrumb -->
+     {% render_breadcrumbs breadcrumbs %}
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body text-center">
+                    {% if usuario.imagen_perfil %}
+                        <img src="{{ usuario.imagen_perfil.url }}" alt="user"
+                             class="rounded-circle mb-2"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'assets/user-icon.png' %}" alt="user"
+                             class="rounded-circle mb-2"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% endif %}
+                    <h6 class="mb-0">Hello! {{ usuario.nombre }}</h6>
+                    <small class="text-muted">{{ usuario.correo }}</small>
+                </div>
+            </div>
+
+            <h6 class="mb-3">Mi cuenta</h6>
+            <div class="list-group shadow-sm rounded-3">
+                <a href="{% url 'profile' %}" class="list-group-item list-group-item-action ">
+                    <i class="bi bi-person me-2"></i> Perfil
+                </a>
+                <a href="{% url 'address' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-geo-alt me-2"></i> Dirección
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-calendar-check me-2"></i> Pedidos
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-heart me-2"></i> Lista de deseos
+                </a>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="col-md-8 col-lg-9">
+            <h4 class="mb-4">Editar Perfil</h4>
+             <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <div class="text-center mb-4">
+                    <div class="position-relative d-inline-block">
+                        <img id="preview-image" src="{{ usuario.imagen_perfil.url }}" class="rounded-circle shadow border" style="width: 120px; height: 120px; object-fit: cover;">
+                        
+                        <label for="id_imagen_perfil" class="btn bg-dark text-light btn-sm position-absolute bottom-0 end-0 rounded-circle"style="cursor: pointer;">
+                            <i class="bi bi-camera-fill "></i>
+                        </label>
+                        <div style="display: none;">
+                            {{ form.imagen_perfil }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_nombre" class="form-label">Nombre </label>
+                    {{ form.nombre }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_correo" class="form-label">Correo </label>
+                    {{ form.correo }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_telefono" class="form-label">Teléfono </label>
+                    {{ form.telefono }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_genero" class="form-label">Género </label>
+                    {{ form.genero }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                    {{ form.fecha_nacimiento }}
+                </div>
+            
+                <!-- Botón guardar -->
+                <button type="submit" class="btn text-light rounded-pill px-4" style="background: linear-gradient(135deg, #ff416c, #ff4b2b);">Guardar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById("id_imagen_perfil").addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const imgPreview = document.getElementById("preview-image");
+            imgPreview.src = URL.createObjectURL(file);
+        }
+    });
+    </script>
+    
+{% endblock %}
