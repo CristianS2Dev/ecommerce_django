@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.messages import add_message, ERROR
+from tienda.usuarios.forms import *
+
 
 
 #---------------------------------------------
@@ -36,39 +38,37 @@ def login(request):
         return render(request, 'login_usuario.html')
     
 
+
 def register(request):
     """Registra un nuevo usuario y lo inicia sesión automáticamente."""
+    next_url = request.POST.get('next') or request.GET.get('next') or 'index'
     if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        correo = request.POST.get('correo')
-        contrasena = request.POST.get('contrasena')
-        confirmar_contrasena = request.POST.get('confirmar_contrasena')
-        next_url = request.POST.get('next', 'index')  # Default to 'index' if 'next' is empty
-        if not next_url:  # Ensure next_url is not empty
-            next_url = 'index'
-        if contrasena != confirmar_contrasena:
-            messages.error(request, 'Las contraseñas no coinciden')
-            return redirect(next_url)
-        try:
-            usuario = Usuario(
-                nombre=nombre,
-                correo=correo,
-                contrasena=make_password(contrasena)
-            )
-            usuario.save()
-            request.session['pista'] = {
-                'id': usuario.id,
-                'nombre': usuario.nombre,
-                'rol': usuario.rol
-            }
-            messages.success(request, 'Usuario registrado e iniciado sesión correctamente')
-            return redirect(next_url)
-        except Exception as e:
-            messages.error(request, f'Error al registrar el usuario: {e}')
-            return redirect(next_url)
+        form = RegistroUsuarioForm(request.POST)
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            correo = form.cleaned_data['correo']
+            contrasena = form.cleaned_data['contrasena']
+            try:
+                usuario = Usuario(
+                    nombre=nombre,
+                    correo=correo,
+                    contrasena=make_password(contrasena)
+                )
+                usuario.save()
+                request.session['pista'] = {
+                    'id': usuario.id,
+                    'nombre': usuario.nombre,
+                    'rol': usuario.rol
+                }
+                messages.success(request, 'Usuario registrado e iniciado sesión correctamente')
+                return redirect(next_url)
+            except Exception as e:
+                messages.error(request, f'Error al registrar el usuario: {e}')
+        else:
+            messages.error(request, 'Por favor corrige los errores del formulario.')
     else:
-        next_url = request.GET.get('next', 'index')
-        return render(request, 'registro_usuario.html', {'next': next_url})
+        form = RegistroUsuarioForm()
+    return render(request, 'registro_usuario.html', {'form': form, 'next': next_url})
 
 
 def logout(request):
@@ -90,6 +90,8 @@ def profile(request):
         messages.error(request, "Usuario no encontrado.")
         return redirect('login_usuario')
 
+    imagen_perfil_url = usuario.imagen_perfil.url if usuario.imagen_perfil and hasattr(usuario.imagen_perfil, 'url') else None
+
     breadcrumbs = [
         ("Inicio", reverse("index")),
         ("Mi cuenta", reverse("profile")),
@@ -98,7 +100,8 @@ def profile(request):
 
     context = {
         'usuario': usuario,
-        'breadcrumbs': breadcrumbs
+        'breadcrumbs': breadcrumbs,
+        'imagen_perfil_url': imagen_perfil_url,
     }
     return render(request, 'usuario/perfil_usuario.html', context)
 

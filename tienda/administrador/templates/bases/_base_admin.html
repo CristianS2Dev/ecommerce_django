@@ -77,21 +77,30 @@
 <script src="{% static 'js/app.js' %}"></script>
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'js/jquery.min.js' %}"></script>
+
+
 <script>
-    
     document.addEventListener('DOMContentLoaded', function () {
-        // Mostrar el modal de login si hay un error relacionado con el inicio de sesión
         const loginError = document.querySelector('.alert-danger.login_error');
-        if (loginError) {
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        const loginModalEl = document.getElementById('loginModal');
+        const registroModalEl = document.getElementById('registroModal');
+        let loginModal, registroModal;
+
+        if (loginModalEl) loginModal = new bootstrap.Modal(loginModalEl);
+        if (registroModalEl) registroModal = new bootstrap.Modal(registroModalEl);
+
+        // Mostrar el modal de login si hay un error relacionado con el inicio de sesión
+        if (loginError && loginModal) {
             loginModal.show();
         }
 
-        // Función para cerrar el modal de login antes de abrir el de registro
+        // Cerrar el modal de login antes de abrir el de registro
         const cerrarLoginModal = () => {
-            const loginModalInstance = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-            if (loginModalInstance) {
-                loginModalInstance.hide();
+            if (loginModalEl) {
+                const loginModalInstance = bootstrap.Modal.getInstance(loginModalEl);
+                if (loginModalInstance) {
+                    loginModalInstance.hide();
+                }
             }
         };
 
@@ -100,9 +109,30 @@
         if (inscribeteLink) {
             inscribeteLink.addEventListener('click', cerrarLoginModal);
         }
-    });
 
+        // Mostrar el modal de login solo si no está abierto el de registro
+        const urlParams = new URLSearchParams(window.location.search);
+        const next = urlParams.get('next');
+        if (next && loginModal && (!registroModalEl || !registroModalEl.classList.contains('show'))) {
+            loginModal.show();
+        }
+
+        // Cuando se abre el modal de registro, asegurarse de cerrar el de login
+        if (registroModalEl) {
+            registroModalEl.addEventListener('show.bs.modal', cerrarLoginModal);
+        }
+
+        // Limpiar backdrop y clase modal-open al cerrar el modal de registro
+        if (registroModalEl) {
+            registroModalEl.addEventListener('hidden.bs.modal', function () {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(b => b.parentNode.removeChild(b));
+                document.body.classList.remove('modal-open');
+            });
+        }
+    });
 </script>
+
 </body>
 
 </html>
