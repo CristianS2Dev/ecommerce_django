@@ -24,6 +24,11 @@ urlpatterns = [
         path('dashboard_admin/banner/add_banner/', views.add_banner, name='add_banner'),
         path('dashboard_admin/banner/edit_banner/<int:banner_id>/', views.edit_banner, name='edit_banner'),
         path('dashboard_admin/banner/delete_banner/<int:banner_id>/', views.delete_banner, name='delete_banner'),
+
+        path('variants/', views.list_variants, name='list_variants'),
+        path('add_variant/<int:id_producto>/', views.add_variant, name='add_variant'),
+        path('edit_variant/<int:id_variante>/', views.edit_variant, name='edit_variant'),
+        path('delete_variant/<int:id_variante>/', views.delete_variant, name='delete_variant'),
 ]
 
 

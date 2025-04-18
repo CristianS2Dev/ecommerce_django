@@ -25,8 +25,8 @@
                   Categorías
               </a>
               <ul class="dropdown-menu" aria-labelledby="categoriasDropdown">
-                  {% for key, value in categorias.items %}
-                      <li><a class="dropdown-item" href="{% url 'productos_por_categoria' key %}">{{ value }}</a></li>
+                  {% for categoria in categorias %}
+                      <li><a class="dropdown-item" href="{% url 'products_by_category' categoria.id %}">{{ categoria.nombre }}</a></li>
                   {% endfor %}
               </ul>
           </li>

@@ -1,5 +1,5 @@
 from django.db import models
-from tienda.productos.models import Producto
+from tienda.productos.models import *
 
 
 class Carrito(models.Model):
@@ -16,13 +16,13 @@ class Carrito(models.Model):
 
 
 class ElementoCarrito(models.Model):
-    carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='elementos')
-    producto = models.ForeignKey('productos.Producto', on_delete=models.CASCADE)
+    carrito = models.ForeignKey('Carrito', on_delete=models.CASCADE, related_name='elementos')
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    variante = models.ForeignKey(Variante, on_delete=models.CASCADE, null=True, blank=True)  # Agrega este campo
     cantidad = models.PositiveIntegerField(default=1)
 
     def subtotal(self):
-        """Calcula el subtotal del elemento (precio del producto * cantidad)."""
-        return self.cantidad * self.producto.precio
+        return self.cantidad * (self.producto.precio if self.producto else 0)
 
     def __str__(self):
         return f"{self.cantidad} x {self.producto.nombre} en {self.carrito}"

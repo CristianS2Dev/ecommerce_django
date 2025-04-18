@@ -126,10 +126,10 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <p><span id="subtotal-{{ elemento.id }}">${{ elemento.subtotal|floatformat:2 }}</span></p>
+                                    <p>Total: $<span id="total">{{ total|floatformat:2 }}</span></p>
                                 </div>
                                 <div class="col-md-1">
-                                    <form method="POST" action="{% url 'eliminar_del_carrito' elemento.id %}">
+                                    <form method="POST" action="{% url 'remove_item' elemento.id %}">
                                         {% csrf_token %}
                                         <button class="btn btn-link p-0 text-danger">
                                             <i class="bi bi-trash remove-btn"></i>
@@ -152,7 +152,7 @@
                             <p>Total: $<span id="total">{{ total|floatformat:2 }}</span></p>
                         </div>
                         {% if request.session.pista %}
-                            <button class="btn btn-primary checkout-btn w-100 mb-3" onclick="window.location.href='{% url 'pagar_carrito' %}'">
+                            <button class="btn btn-primary checkout-btn w-100 mb-3" onclick="window.location.href='{% url 'checkout_cart' %}'">
                                 Proceder al Pago
                             </button>
                         {% else %}
@@ -190,7 +190,7 @@
         input.value = newQuantity;
 
         // Enviar solicitud AJAX al servidor
-        fetch(`/carrito/actualizar/${elementId}/`, {
+        fetch("{% url 'update_item' 0 %}".replace('0', elementId), {  // Genera la URL correcta
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',

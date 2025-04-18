@@ -64,10 +64,10 @@
             <div class="mb-4">
                 <h6 class="mb-2">Colores disponibles:</h6>
                 {% if variantes %}
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="d-flex flex-wrap gap-2" id="colorOptions">
                         {% for variante in variantes %}
-                            <label class="rounded-circle border border-light" style="width: 30px; height: 30px; background-color: {{ variante.color }};">
-                                <input type="radio" name="color" value="{{ variante.color }}" class="d-none" onchange="updateColor('{{ variante.color }}')">
+                            <label class="rounded-circle border border-light" style="width: 30px; height: 30px; background-color: {{ variante.color }};" onclick="selectColor('{{ variante.color }}', this)">
+                                <input type="radio" name="color" value="{{ variante.color }}" class="d-none">
                             </label>
                         {% endfor %}
                     </div>
@@ -78,10 +78,10 @@
             <div class="mb-4">
                 <h6 class="mb-2">Tallas disponibles:</h6>
                 {% if variantes %}
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="d-flex flex-wrap gap-2" id="tamanoOptions">
                         {% for variante in variantes %}
-                            <label class="badge bg-light text-dark border px-3 py-2">
-                                <input type="radio" name="tamano" value="{{ variante.talla }}" class="d-none" onchange="updateTamano('{{ variante.talla }}')">
+                            <label class="badge bg-light text-dark border px-3 py-2" onclick="selectTamano('{{ variante.talla }}', this)">
+                                <input type="radio" name="tamano" value="{{ variante.talla }}" class="d-none">
                                 {{ variante.talla }}
                             </label>
                         {% endfor %}
@@ -93,11 +93,24 @@
             <div class="mb-4">
                 <div class="d-flex align-items-center">
                     <label class="me-2">Cantidad:</label>
-                    <select class="form-select w-auto" id="cantidadSelect" onchange="updateCantidad()">
-                        {% for i in rango_cantidad %}
-                            <option value="{{ i }}">{{ i }}</option>
+                    {% with stockid=None %}
+                        {% for variante in variantes %}
+                            {% if variante.stock > 0 and not stockid %}
+                                {% with stockid=variante.stock %}
+                                {% endwith %}
+                            {% endif %}
                         {% endfor %}
-                    </select>
+                    {% endwith %}
+                    {% if cantidad_rango %}
+                        <input type="hidden" id="stockid" value="{{ stockid }}">
+                        <select class="form-select w-auto" id="cantidadSelect" onchange="updateCantidad()">
+                            {% for i in cantidad_rango %}
+                                <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <p class="text-danger">No hay stock disponible</p>
+                    {% endif %}
                 </div>
             </div>
             <div class="d-grid gap-2">
@@ -133,21 +146,34 @@
 </div>
 
 <script>
-function changeMainImage(url) {
-    document.getElementById('mainImage').src = url;
-}
-
-function updateColor(colorId) {
-    document.getElementById('colorInput').value = colorId;
-}
-
-function updateTamano(tamanoId) {
-    document.getElementById('tamanoInput').value = tamanoId;
-}
-
-function updateCantidad() {
-    const cantidad = document.getElementById('cantidadSelect').value;
-    document.getElementById('cantidadInput').value = cantidad;
-}
-</script>
+    function changeMainImage(url) {
+        document.getElementById('mainImage').src = url;
+    }
+    
+    function updateCantidad() {
+        const cantidad = document.getElementById('cantidadSelect').value;
+        document.getElementById('cantidadInput').value = cantidad;
+    }
+    
+    function selectColor(color, element) {
+        // Actualiza el input oculto
+        document.getElementById('colorInput').value = color;
+    
+        // Remueve 'active' de todos
+        document.querySelectorAll('#colorOptions label').forEach(el => el.classList.remove('border-dark'));
+        // Añade 'active' visual
+        element.classList.add('border-dark');
+    }
+    
+    function selectTamano(tamano, element) {
+        // Actualiza el input oculto
+        document.getElementById('tamanoInput').value = tamano;
+    
+        // Remueve 'active' de todos
+        document.querySelectorAll('#tamanoOptions label').forEach(el => el.classList.remove('bg-dark', 'text-white'));
+        // Añade 'active' visual
+        element.classList.add('bg-dark', 'text-white');
+    }
+    </script>
+    
 {% endblock %}

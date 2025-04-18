@@ -57,7 +57,7 @@ def add_item(request, id_producto):
         carrito = get_cart(request)
     except ValueError as e:
         messages.error(request, str(e))
-        return redirect('carrito')
+        return redirect('cart')
 
     producto = get_object_or_404(Producto, id=id_producto)
     cantidad = int(request.POST.get('cantidad', 1))
@@ -85,14 +85,14 @@ def add_item(request, id_producto):
     if not creado:
         if elemento.cantidad + cantidad > variante.stock:
             messages.error(request, "La cantidad total excede el stock disponible para esta variante.")
-            return redirect('carrito')
+            return redirect('cart')
         elemento.cantidad += cantidad
     else:
         elemento.cantidad = cantidad
     elemento.save()
 
     messages.success(request, f"{producto.nombre} ({color}, {talla}) agregado al carrito.")
-    return redirect('carrito')
+    return redirect('cart')
 
 def update_item(request, id_elemento):
     """Actualiza la cantidad de un producto en el carrito."""
@@ -107,7 +107,7 @@ def update_item(request, id_elemento):
             total = carrito.total()
             return JsonResponse({'subtotal': 0, 'total': total})
 
-        if nueva_cantidad > elemento.producto.stock:
+        if nueva_cantidad > elemento.variante.stock:
             return JsonResponse({'error': 'La cantidad excede el stock disponible.'}, status=400)
 
         # Actualizar la cantidad
@@ -124,19 +124,18 @@ def update_item(request, id_elemento):
 
 
 
-def remove_item(request, id_producto):
-    """Vista para eliminar un producto del carrito de compras."""
+def remove_item(request, id_elemento):
+    """Vista para eliminar un elemento del carrito de compras."""
     carrito = get_cart(request)
-    producto = get_object_or_404(Producto, id=id_producto)
-    elemento = ElementoCarrito.objects.filter(carrito=carrito, producto=producto).first()
+    elemento = get_object_or_404(ElementoCarrito, id=id_elemento, carrito=carrito)
 
     if elemento:
         elemento.delete()
-        messages.success(request, f"{producto.nombre} eliminado del carrito.")
+        messages.success(request, f"{elemento.producto.nombre} eliminado del carrito.")
     else:
-        messages.error(request, "El producto no está en el carrito.")
+        messages.error(request, "El elemento no está en el carrito.")
 
-    return redirect('carrito')
+    return redirect('cart')
 
 
 @session_rol_permission()
@@ -150,13 +149,13 @@ def checkout_cart(request):
 
     if not carrito.elementos.exists():
         messages.error(request, "El carrito está vacío.")
-        return redirect('carrito')
+        return redirect('cart')
 
     # Validar stock antes de procesar el pago
     for elemento in carrito.elementos.all():
         if elemento.cantidad > elemento.producto.stock:
             messages.error(request, f"Stock insuficiente para {elemento.producto.nombre}.")
-            return redirect('carrito')
+            return redirect('cart')
 
     # Procesar el pago
     total = carrito.total()

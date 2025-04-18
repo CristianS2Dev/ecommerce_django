@@ -16,6 +16,25 @@
 
 # CHANGELOG
 
+---
+
+## [v3.1.1-alpha.1] - 17-04-2025
+
+### Added
+- Se implementan vistas y URLs para gestionar variantes de productos (añadir, editar, eliminar).
+- Se agrega paginación a la vista de listado de productos e integración de opciones de filtrado (categoría, precio, marca, color).
+- Se mejora la vista de detalle de productos para mostrar variantes disponibles y su stock.
+- Se actualiza el carrito de compras para asociar los artículos con variantes específicas.
+- Se añaden estilos CSS para colores y tallas seleccionados.
+
+### Changed
+- Se actualizan las vistas de gestión de productos para manejar variantes durante la creación y edición de productos.
+- Se mejora la interfaz de usuario para la selección de colores y tallas en las páginas de detalle de productos.
+- Se refactorizan los templates para optimizar las vistas de listado y detalle de productos.
+- Se actualizan los templates de navegación e índice para mejorar la experiencia del usuario.
+
+---
+
 ## [v3.0.0-alpha.1] - 17-04-2025
 
 ### Added

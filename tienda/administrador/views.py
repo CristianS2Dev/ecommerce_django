@@ -5,7 +5,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from tienda.utils.decorators import *
 from tienda.utils.validators import *
 from django.contrib import messages
+from .forms import VarianteForm 
 import json
+from django.core.paginator import Paginator
 
 
 
@@ -58,7 +60,14 @@ def dashboard_admin(request):
 def lista_productos_admin(request):
     """Lista todos los productos en la vista de administración."""
     q = Producto.objects.all()
-    context = {'data': q}
+    variantes = Variante.objects.all()
+    paginator = Paginator(q, 10)  # Cambia el número de productos por página según sea necesario
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'data': q,
+               'variantes': variantes,
+               'page_obj': page_obj,
+               'paginator': paginator,}
     return render(request, 'productos/lista_productos_admin.html', context)
 
 
@@ -76,28 +85,19 @@ def agregar_producto(request):
         etiquetas_ids = request.POST.getlist("etiquetas")
         categoria_id = request.POST.get("categoria")
         marca_id = request.POST.get("marca")
-        variantes = request.POST.getlist("variantes")  # Variantes enviadas como listas
         imagenes = request.FILES.getlist("imagenes")
 
         try:
-            # Convertir y validar datos
-            precio_original = Decimal(precio_original)
-            descuento = Decimal(descuento)
-
-            # Obtener instancias de relaciones
-            categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
-            marca = Marca.objects.get(id=marca_id) if marca_id else None
-
             # Crear el producto
             producto = Producto(
                 nombre=nombre,
                 descripcion=descripcion,
-                precio_original=precio_original,
-                descuento=descuento,
+                precio_original=Decimal(precio_original),
+                descuento=Decimal(descuento),
                 en_oferta=en_oferta,
-                categoria=categoria,
-                marca=marca,
                 sku=sku,
+                categoria=Categoria.objects.get(id=categoria_id) if categoria_id else None,
+                marca=Marca.objects.get(id=marca_id) if marca_id else None,
             )
             producto.save()
 
@@ -105,61 +105,41 @@ def agregar_producto(request):
             if etiquetas_ids:
                 producto.etiquetas.set(etiquetas_ids)
 
-            # Guardar variantes asociadas al producto
-            for variante in request.POST.getlist("variantes[]"):
-                color = variante.get("color")
-                talla = variante.get("talla")
-                stock = variante.get("stock", 0)
-                Variante.objects.create(
-                    producto=producto,
-                    color=color,
-                    talla=talla,
-                    stock=stock,
-                )
+            # Procesar variantes
+            for key, value in request.POST.items():
+                if key.startswith("variantes"):
+                    index = key.split("[")[1].split("]")[0]
+                    color = request.POST.get(f"variantes[{index}][color]")
+                    talla = request.POST.get(f"variantes[{index}][talla]")
+                    stock = request.POST.get(f"variantes[{index}][stock]", 0)
+                    if color and talla:
+                        Variante.objects.create(
+                            producto=producto,
+                            color=color,
+                            talla=talla,
+                            stock=int(stock),
+                        )
 
             # Guardar imágenes asociadas al producto
             for imagen in imagenes:
                 ImagenProducto.objects.create(producto=producto, imagen=imagen)
 
             messages.success(request, 'Producto agregado correctamente')
-            return redirect('lista_productos_admin')  # Cambia a la URL adecuada
-        except Categoria.DoesNotExist:
-            messages.error(request, "La categoría seleccionada no existe.")
-        except Marca.DoesNotExist:
-            messages.error(request, "La marca seleccionada no existe.")
-        except ValidationError as ve:
-            messages.error(request, f"Error de validación: {ve}")
+            return redirect('lista_productos_admin')
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
-        # Si ocurre un error, devolver los datos ingresados al formulario
-        categorias = Categoria.objects.all()
-        marcas = Marca.objects.all()
-        etiquetas = Etiqueta.objects.all()
+    # Si ocurre un error, renderizar el formulario nuevamente
+    categorias = Categoria.objects.all()
+    marcas = Marca.objects.all()
+    etiquetas = Etiqueta.objects.all()
+    return render(request, "productos/agregar_producto.html", {
+        'categorias': categorias,
+        'marcas': marcas,
+        'etiquetas': etiquetas,
+    })
 
-        return render(request, "productos/agregar_producto.html", {
-            'categorias': categorias,
-            'marcas': marcas,
-            'nombre': nombre,
-            'descripcion': descripcion,
-            'precio_original': precio_original,
-            'descuento': descuento,
-            'en_oferta': en_oferta,
-            'categoria_id': categoria_id,
-            'marca_id': marca_id,
-            'sku': sku,
-            'etiquetas': etiquetas,
-        })
-    else:
-        categorias = Categoria.objects.all()
-        marcas = Marca.objects.all()
-        etiquetas = Etiqueta.objects.all()
 
-        return render(request, "productos/agregar_producto.html", {
-            'categorias': categorias,
-            'marcas': marcas,
-            'etiquetas': etiquetas
-        })
 
 @session_rol_permission(1)
 def editar_producto(request, id_producto):
@@ -168,7 +148,7 @@ def editar_producto(request, id_producto):
         producto = Producto.objects.get(pk=id_producto)
     except Producto.DoesNotExist:
         messages.error(request, "Producto no encontrado")
-        return redirect('listar_productos')
+        return redirect('lista_productos_admin')
 
     if request.method == "POST":
         nombre = request.POST.get("nombre")
@@ -177,103 +157,76 @@ def editar_producto(request, id_producto):
         descuento = request.POST.get("descuento", "0")
         en_oferta = request.POST.get("en_oferta") == "on"
         sku = request.POST.get("sku")
-        etiquetas_ids = request.POST.getlist("etiquetas")  
+        etiquetas_ids = request.POST.getlist("etiquetas")
         categoria_id = request.POST.get("categoria")
         marca_id = request.POST.get("marca")
-        variantes = request.POST.get("variantes") 
         imagenes = request.FILES.getlist("imagenes")
 
-        if producto.sku != sku:
-            if Producto.objects.filter(sku=sku).exists():
-                messages.error(request, "El SKU ya existe.")
-                return redirect('editar_producto', id_producto=id_producto)
-            else:
-                producto.sku = sku
-
         try:
-            precio_original = Decimal(precio_original)
-            descuento = Decimal(descuento)
-
-            categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
-            marca = Marca.objects.get(id=marca_id) if marca_id else None
-
+            # Actualizar datos del producto
             producto.nombre = nombre
             producto.descripcion = descripcion
-            producto.precio_original = precio_original
-            producto.descuento = descuento
+            producto.precio_original = Decimal(precio_original)
+            producto.descuento = Decimal(descuento)
             producto.en_oferta = en_oferta
-            producto.categoria = categoria
-            producto.marca = marca
             producto.sku = sku
+            producto.categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
+            producto.marca = Marca.objects.get(id=marca_id) if marca_id else None
             producto.save()
 
-            if etiquetas_ids:
-                producto.etiquetas.set(etiquetas_ids)
+            # Actualizar etiquetas
+            producto.etiquetas.set(etiquetas_ids)
 
-            if variantes:
-                producto.variantes.all().delete()  
-                for variante in json.loads(variantes): 
-                    Variante.objects.create(
-                        producto=producto,
-                        color=variante.get("color"),
-                        talla=variante.get("talla"),
-                        stock=variante.get("stock", 0),
-                    )
+            # Actualizar variantes
+            producto.variantes.all().delete()  # Eliminar variantes existentes
+            variantes = [key for key in request.POST if key.startswith("variantes")]
+            processed_indices = set()  # Para evitar procesar índices duplicados
+            for key in variantes:
+                index = key.split("[")[1].split("]")[0]
+                if index not in processed_indices:
+                    processed_indices.add(index)
+                    color = request.POST.get(f"variantes[{index}][color]")
+                    talla = request.POST.get(f"variantes[{index}][talla]")
+                    stock = request.POST.get(f"variantes[{index}][stock]", 0)
+                    if color and talla:
+                        Variante.objects.create(
+                            producto=producto,
+                            color=color,
+                            talla=talla,
+                            stock=int(stock),
+                        )
 
+            # Actualizar imágenes
             for imagen in imagenes:
                 ImagenProducto.objects.create(producto=producto, imagen=imagen)
 
             messages.success(request, "Producto actualizado correctamente")
-            return redirect('lista_productos_admin')  # Cambia a la URL adecuada
-        except Categoria.DoesNotExist:
-            messages.error(request, "La categoría seleccionada no existe.")
-        except Marca.DoesNotExist:
-            messages.error(request, "La marca seleccionada no existe.")
-        except ValidationError as ve:
-            messages.error(request, f"Error de validación: {ve}")
+            return redirect('lista_productos_admin')
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
-        categorias = Categoria.objects.all()
-        marcas = Marca.objects.all()
-        etiquetas = Etiqueta.objects.all()
+    # Renderizar el formulario con los datos actuales
+    categorias = Categoria.objects.all()
+    marcas = Marca.objects.all()
+    etiquetas = Etiqueta.objects.all()
+    variantes = producto.variantes.all()
+    return render(request, "productos/agregar_producto.html", {
+        'dato': producto,
+        'categorias': categorias,
+        'marcas': marcas,
+        'etiquetas': etiquetas,
+        'variantes': variantes,
+        'nombre': producto.nombre,
+        'descripcion': producto.descripcion,
+        'precio_original': producto.precio_original,
+        'descuento': producto.descuento,
+        'en_oferta': producto.en_oferta,
+        'sku': producto.sku,
+        'categoria_id': producto.categoria.id if producto.categoria else None,
+        'marca_id': producto.marca.id if producto.marca else None,
+        'etiquetas_ids': producto.etiquetas.values_list('id', flat=True),
+    })
 
-        return render(request, "productos/agregar_producto.html", {
-            'producto': producto,
-            'categorias': categorias,
-            'marcas': marcas,
-            'etiquetas': etiquetas,
-            'nombre': nombre,
-            'descripcion': descripcion,
-            'precio_original': precio_original,
-            'descuento': descuento,
-            'en_oferta': en_oferta,
-            'categoria_id': categoria_id,
-            'marca_id': marca_id,
-            'etiquetas_ids': etiquetas_ids,
-        })
-    else:
-        categorias = Categoria.objects.all()
-        marcas = Marca.objects.all()
-        etiquetas = Etiqueta.objects.all()
-        variantes = producto.variantes.all()
-
-        return render(request, "productos/agregar_producto.html", {
-            'dato': producto, 
-            'categorias': categorias,
-            'marcas': marcas,
-            'etiquetas': etiquetas,
-            'variantes': variantes,
-            'nombre': producto.nombre,
-            'descripcion': producto.descripcion,
-            'precio_original': producto.precio_original,
-            'descuento': producto.descuento,
-            'en_oferta': producto.en_oferta,
-            'categoria_id': producto.categoria.id if producto.categoria else None,
-            'marca_id': producto.marca.id if producto.marca else None,
-            'sku': producto.sku,
-            'etiquetas_ids': producto.etiquetas.values_list('id', flat=True),
-        })
 
 @session_rol_permission(1)
 def eliminar_producto(request, id_producto):
@@ -432,3 +385,74 @@ def delete_banner(request, banner_id):
     except Exception as e:
         messages.error(request, f'Error: {e}')
     return redirect('list_banners')
+
+
+@session_rol_permission(1)
+def list_variants(request):
+    """Lista todas las variantes de productos."""
+    variantes = Variante.objects.select_related('producto').all()
+    context = {'variantes': variantes}
+    return render(request, 'productos/variantes/lista_variantes_admin.html', context)
+
+
+
+@session_rol_permission(1)
+def add_variant(request, id_producto):
+    """
+    Vista para agregar una nueva variante a un producto.
+    """
+    producto = get_object_or_404(Producto, id=id_producto)
+
+    if request.method == 'POST':
+        form = VarianteForm(request.POST)
+        if form.is_valid():
+            variante = form.save(commit=False)
+            variante.producto = producto
+            variante.save()
+            messages.success(request, 'Variante agregada exitosamente.')
+            return redirect('list_variants', id_producto=producto.id)
+    else:
+        form = VarianteForm()
+
+    return render(request, 'productos/variantes/agregar_variante.html', {
+        'form': form,
+        'producto': producto,
+    })
+
+
+@session_rol_permission(1)
+def edit_variant(request, id_variante):
+    """
+    Vista para editar una variante existente.
+    """
+    variante = get_object_or_404(Variante, id=id_variante)
+    producto = variante.producto
+
+    if request.method == 'POST':
+        form = VarianteForm(request.POST, instance=variante)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Variante actualizada exitosamente.')
+            return redirect('list_variants', id_producto=producto.id)
+    else:
+        form = VarianteForm(instance=variante)
+
+    return render(request, 'productos/variantes/agregar_variante.html', {
+        'form': form,
+        'producto': producto,
+        'variante': variante,
+    })
+
+
+@session_rol_permission(1)
+def delete_variant(request, variant_id):
+    """Elimina una variante."""
+    try:
+        q: Variante = Variante.objects.get(id=variant_id)
+        q.delete()
+        messages.success(request, 'Variante eliminada correctamente')
+    except Variante.DoesNotExist:
+        messages.error(request, 'Variante no encontrada')
+    except Exception as e:
+        messages.error(request, f'Error: {e}')
+    return redirect('list_variants')

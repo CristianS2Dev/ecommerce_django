@@ -10,93 +10,87 @@ from django.shortcuts import render, get_object_or_404
 
 # --- Vista de Productos ---
 
-def products(request):
-    """
-    Vista para mostrar la lista de productos.
-    """
-    q = Producto.objects.all()
-    context = {'data': q}
-    return render(request, 'productos/productos.html', context)
 
 
-def list_products(request):
+from django.db.models import Q
+
+def list_products(request, id_categoria=None):
     """
-    Vista para mostrar la lista de productos con paginación.
+    Vista para mostrar la lista de productos con filtros opcionales.
+    Si se proporciona una categoría, filtra los productos por esa categoría.
     """
     productos = Producto.objects.all()
+    colores_disponibles = Variante.objects.values('color').distinct()
+
+    categoria = None
+    if id_categoria:
+        categoria = get_object_or_404(Categoria, id=id_categoria)
+        productos = productos.filter(categoria=categoria)
 
     nombre = request.GET.get('nombre')
-    marca = request.GET.getlist('marca')
-    etiquetas = request.GET.getlist('etiquetas')
-
     if nombre:
         productos = productos.filter(nombre__icontains=nombre)
-    if etiquetas:
-        productos = productos.filter(etiquetas__id__in=etiquetas).distinct()
-    if marca:
-        productos = productos.filter(marca__id__in=marca)
+
+    precio_min = request.GET.get('precio_min')
+    precio_max = request.GET.get('precio_max')
+    if precio_min:
+        productos = productos.filter(precio__gte=precio_min)
+    if precio_max:
+        productos = productos.filter(precio__lte=precio_max)
+
+    marca_id = request.GET.get('marca')
+    if marca_id:
+        productos = productos.filter(marca_id=marca_id)
+
+    colores = request.GET.getlist('color')
+    if colores:
+        productos = productos.filter(variantes__color__in=colores).distinct()
+
+    # Ordenar productos
+    orden = request.GET.get('orden')
+    if orden == 'popular':
+        productos = productos.order_by('-id')  # Cambia según tu lógica de popularidad
+    elif orden == 'barato':
+        productos = productos.order_by('precio')
+    elif orden == 'caro':
+        productos = productos.order_by('-precio')
 
     # Paginación
     paginator = Paginator(productos, 9)  # 9 productos por página
     page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.get_page(page_number)
-    except Exception:
-        page_obj = paginator.get_page(1)  # Si hay un error, mostrar la primera página
+    page_obj = paginator.get_page(page_number)
 
+    # Contexto para la plantilla
     contexto = {
-        'data': page_obj,  # Cambiar 'productos' por 'data' para la paginación
-        'nombre': nombre,
-        'marca': marca,
-        'etiquetas': etiquetas,
+        'data': page_obj,
+        'categoria': categoria,
+        'categorias': Categoria.objects.all(),
+        'marcas_disponibles': Marca.objects.all(),
+        'colores_disponibles': colores_disponibles,
     }
     return render(request, 'productos/lista_productos.html', contexto)
-
-
 
 def product_detail(request, id_producto):
     """Muestra los detalles de un producto."""
     producto = get_object_or_404(Producto, id=id_producto)
     variantes = producto.variantes.all()  # Obtener todas las variantes del producto
 
-    # Generar un rango de cantidades basado en el stock total del producto
-    rango_cantidad = range(1, producto.stock + 1) if producto.stock > 0 else []
+    # Obtener el stock del primer variante disponible
+    stockid = None
+    for variante in variantes:
+        if variante.stock > 0:
+            stockid = variante.stock
+            break
+
+    # Generar el rango de cantidades si hay stock
+    cantidad_rango = range(1, stockid + 1) if stockid else []
 
     return render(request, 'productos/detalle_producto.html', {
         'producto': producto,
         'variantes': variantes,  # Pasar las variantes al contexto
-        'rango_cantidad': rango_cantidad,  # Pasar el rango de cantidades
+        'cantidad_rango': cantidad_rango,  # Pasar el rango de cantidades al contexto
     })
 
 
-def products_by_category(request, id_categoria):
-    """
-    Vista para mostrar productos por categoría.
-    """
-    categoria = get_object_or_404(Categoria, id=id_categoria)
-    productos = Producto.objects.filter(categoria=categoria)
 
-    nombre = request.GET.get('nombre')
-    marca = request.GET.getlist('marca')
-    etiquetas = request.GET.getlist('etiquetas')
 
-    if nombre:
-        productos = productos.filter(nombre__icontains=nombre)
-    if etiquetas:
-        productos = productos.filter(etiquetas__id__in=etiquetas).distinct()
-    if marca:
-        productos = productos.filter(marca__id__in=marca)
-
-    # Paginación
-    paginator = Paginator(productos, 9)  # 9 productos por página
-    page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.get_page(page_number)
-    except Exception:
-        page_obj = paginator.get_page(1)  # Si hay un error, mostrar la primera página
-
-    contexto = {
-        'data': page_obj,  # Cambiar 'productos' por 'data' para la paginación
-        'categoria': categoria.nombre,  # Usar el nombre de la categoría
-    }
-    return render(request, 'productos/productos_por_categoria.html', contexto)
