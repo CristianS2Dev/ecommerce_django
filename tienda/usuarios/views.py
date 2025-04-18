@@ -103,14 +103,14 @@ def profile(request):
     return render(request, 'usuario/perfil_usuario.html', context)
 
 
-
 def update_profile(request):
-    """"Actualiza el perfil del usuario autenticado."""
+    """Actualiza el perfil del usuario autenticado."""
     try:
         usuario = Usuario.objects.get(id=request.session['pista']['id'])
     except Usuario.DoesNotExist:
         messages.error(request, "Usuario no encontrado.")
         return redirect('login_usuario')
+
     if request.method == 'POST':
         form = PerfilUsuarioForm(request.POST, request.FILES, instance=usuario)
         if form.is_valid():
@@ -118,22 +118,26 @@ def update_profile(request):
             messages.success(request, 'Perfil actualizado correctamente.')
             return redirect('profile')
         else:
-            print(form.errors)
             messages.error(request, 'Por favor corrige los errores del formulario.')
     else:
         form = PerfilUsuarioForm(instance=usuario)
+
+    # Verificar si el usuario tiene una imagen asociada
+    imagen_perfil_url = usuario.imagen_perfil.url if usuario.imagen_perfil and hasattr(usuario.imagen_perfil, 'url') else None
+
     breadcrumbs = [
         ("Inicio", reverse("index")),
         ("Mi cuenta", reverse("profile")),
         ("Editar perfil", None)
     ]
+
     context = {
         'form': form,
         'usuario': usuario,
-        'breadcrumbs': breadcrumbs
+        'breadcrumbs': breadcrumbs,
+        'imagen_perfil_url': imagen_perfil_url,
     }
-    return render(request, 'usuario/editar_profile.html', context)
-
+    return render(request, 'usuario/editar_perfil_usuario.html', context)
 
 
 def delete_profile(request):
@@ -170,11 +174,7 @@ def address(request):
         'breadcrumbs': breadcrumbs,
         'direcciones': direcciones,
     }
-    return render(request, 'usuario/direccion_usuario.html', {
-        'usuario': usuario,
-        'direcciones': direcciones,
-        'breadcrumbs': breadcrumbs
-    })
+    return render(request, 'usuario/direccion_usuario.html', context)
 
 
 def add_address(request):
@@ -185,6 +185,13 @@ def add_address(request):
         messages.error(request, "Usuario no encontrado.")
         return redirect('login_usuario')
 
+    breadcrumbs = [
+        ("Inicio", reverse("index")),
+        ("Mi cuenta", reverse("profile")),
+        ("Dirección", reverse("address")),
+        ("Agregar Dirección", None)
+    ]
+
     if request.method == 'POST':
         direccion = request.POST.get('direccion')
         ciudad = request.POST.get('ciudad')
@@ -192,6 +199,7 @@ def add_address(request):
         codigo_postal = request.POST.get('codigo_postal')
         pais = request.POST.get('pais')
         principal = request.POST.get('principal') == 'on'  # Verifica si el checkbox está marcado
+
         try:
             # Validar los datos de la dirección
             validar_direccion(direccion, ciudad, estado, codigo_postal, pais)
@@ -207,14 +215,16 @@ def add_address(request):
                 principal=principal
             )
             messages.success(request, 'Dirección agregada correctamente.')
-            return redirect('direccion_usuario')
+            return redirect('address')
         except ValidationError as ve:
             messages.error(request, f"Error de validación: {ve}")
         except Exception as e:
             messages.error(request, f"Error inesperado: {e}")
 
+
         # Si hay un error, devolver los datos ingresados al formulario
-        return render(request, 'tienda/usuario/agregar_direccion_usuario.html', {
+        return render(request, 'usuario/agregar_direccion_usuario.html', {
+            'breadcrumbs': breadcrumbs,
             'direccion_valor': direccion,
             'ciudad_valor': ciudad,
             'estado_valor': estado,
@@ -222,9 +232,12 @@ def add_address(request):
             'pais_valor': pais,
             'principal_valor': principal,
         })
+    
+   
 
     # Para solicitudes GET, pasar valores vacíos al formulario
-    return render(request, 'tienda/usuario/agregar_direccion_usuario.html', {
+    return render(request, 'usuario/agregar_direccion_usuario.html', {
+        'breadcrumbs': breadcrumbs,
         'direccion_valor': '',
         'ciudad_valor': '',
         'estado_valor': '',
@@ -241,7 +254,14 @@ def update_address(request,id_direccion):
         direccion = Direccion.objects.get(id=id_direccion, usuario__id=request.session['pista']['id'])
     except Direccion.DoesNotExist:
         messages.error(request, "Dirección no encontrada.")
-        return redirect('direccion_usuario')
+        return redirect('address')
+
+    breadcrumbs = [
+        ("Inicio", reverse("index")),
+        ("Mi cuenta", reverse("profile")),
+        ("Dirección", reverse("address")),
+        ("Actualizar Dirección", None)
+    ]
 
     if request.method == 'POST':
         direccion.direccion = request.POST.get('direccion')
@@ -256,13 +276,14 @@ def update_address(request,id_direccion):
             # Guardar los cambios
             direccion.save()
             messages.success(request, 'Dirección actualizada correctamente.')
-            return redirect('direccion_usuario')
+            return redirect('address')
         except ValidationError as ve:
             messages.error(request, f"Error de validación: {ve}")
         except Exception as e:
             messages.error(request, f"Error inesperado: {e}")
 
-    return render(request, 'tienda/usuario/agregar_direccion_usuario.html', {
+    return render(request, 'usuario/agregar_direccion_usuario.html', {
+        'breadcrumbs': breadcrumbs,
         'direccion': direccion,
         'direccion_valor': direccion.direccion,
         'ciudad_valor': direccion.ciudad,
@@ -283,14 +304,14 @@ def delete_address(request, id):
         messages.error(request, "Dirección no encontrada.")
     except Exception as e:
         messages.error(request, f"Error inesperado: {e}")
-    return redirect('direccion_usuario')
+    return redirect('address')
 
 
-def set_primary_address(request):
-    """"Establece una dirección como principal."""
+def set_primary_address(request, id_address):
+    """Establece una dirección como principal."""
     try:
-        direccion = Direccion.objects.get(id=id, usuario__id=request.session['pista']['id'])
-        Direccion.objects.filter(usuario=direccion.usuario, principal=True).update(principal=False)
+        direccion = Direccion.objects.get(id=id_address, usuario__id=request.session['pista']['id'])
+        Direccion.objects.filter(usuario=direccion.usuario).update(principal=False)
         direccion.principal = True
         direccion.save()
         messages.success(request, 'Dirección establecida como principal.')
@@ -298,4 +319,4 @@ def set_primary_address(request):
         messages.error(request, "Dirección no encontrada.")
     except Exception as e:
         messages.error(request, f"Error inesperado: {e}")
-    return redirect('direccion_usuario')	    
+    return redirect('address')

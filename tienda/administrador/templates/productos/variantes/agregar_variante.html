@@ -3,13 +3,17 @@
 {% block titulo %}{{ variante|default:"Agregar Variante" }}{% endblock %}
 
 {% block main %}
-<div class="container">
-    <h1>{{ variante|default:"Agregar Variante" }}</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="{% url 'list_variants' %}" class="btn btn-secondary">Cancelar</a>
-    </form>
+<div class="d-flex" style="width: 100%;">
+    {% include 'bases/_sidebar.html' %}
+    <div class="container py-4">
+        <h1>{{ variante|default:"Agregar Variante" }}</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{% url 'list_variants' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

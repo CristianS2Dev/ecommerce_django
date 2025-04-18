@@ -4,48 +4,51 @@
 {% block titulo %}Crear Banner{% endblock %}
 {% block main %}
 
-<div class="container mt-4 mb-4">
-    <a href="{% url 'dashboard_admin' %}" class="btn">
-        <i class="bi bi-arrow-left"></i> Volver
-    </a>
-    {% if dato %}
-        <h1>Actualizar Banner {{ dato }}</h1>
-    {% else %}
-        <h1>Agregar Banner</h1>
-    {% endif %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="titulo" class="form-label">Título</label>
-            <input type="text" class="form-control" id="titulo" name="titulo" required>
-        </div>
-        <div class="mb-3">
-            <label for="imagen" class="form-label">Imagen</label>
-            <input type="file" class="form-control" id="imagen" name="imagen" required>
-        </div>
-        <div class="mb-3">
-            <label for="texto" class="form-label">Texto del Banner</label>
-            <textarea class="form-control" id="texto" name="texto" rows="3"></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="tipo" class="form-label">Tipo de Banner</label>
-            <select class="form-select" id="tipo" name="tipo" required>
-                <option value="principal" {% if banner.tipo == "principal" %}selected{% endif %}>Principal</option>
-                <option value="secundario" {% if banner.tipo == "secundario" %}selected{% endif %}>Secundario</option>
-            </select>
-        </div>
-        <div class="d-flex justify-content-between">
-            {% if dato %}
-                <button type="submit" class="btn btn-success">Actualizar</button>
-                <a href="{% url 'list_banners' %}" class="btn btn-danger">Cancelar</a>
-                
-            {% else %}
-                <button type="submit" class="btn btn-primary">Agregar</button>
-                <a href="{% url 'list_banners' %}" class="btn btn-danger">Cancelar</a>
-    
-            {% endif %}
-        </div>
-    </form>
+<div class="d-flex" style="width: 100%;">
+    {% include 'bases/_sidebar.html' %}
+    <div class="container py-4">
+        <a href="{% url 'dashboard_admin' %}" class="btn">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        {% if dato %}
+            <h1>Actualizar Banner {{ dato }}</h1>
+        {% else %}
+            <h1>Agregar Banner</h1>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="titulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" required>
+            </div>
+            <div class="mb-3">
+                <label for="imagen" class="form-label">Imagen</label>
+                <input type="file" class="form-control" id="imagen" name="imagen" required>
+            </div>
+            <div class="mb-3">
+                <label for="texto" class="form-label">Texto del Banner</label>
+                <textarea class="form-control" id="texto" name="texto" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo de Banner</label>
+                <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="principal" {% if banner.tipo == "principal" %}selected{% endif %}>Principal</option>
+                    <option value="secundario" {% if banner.tipo == "secundario" %}selected{% endif %}>Secundario</option>
+                </select>
+            </div>
+            <div class="d-flex justify-content-between">
+                {% if dato %}
+                    <button type="submit" class="btn btn-success">Actualizar</button>
+                    <a href="{% url 'list_banners' %}" class="btn btn-danger">Cancelar</a>
+                    
+                {% else %}
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                    <a href="{% url 'list_banners' %}" class="btn btn-danger">Cancelar</a>
+        
+                {% endif %}
+            </div>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

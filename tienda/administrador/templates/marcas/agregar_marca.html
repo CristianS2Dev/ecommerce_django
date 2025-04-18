@@ -3,22 +3,25 @@
 {% load static humanize custom_filters breadcrumbs %}
 {% block titulo %}Agregar Marca{% endblock %}
 {% block main %}
-<div class="container">
-    <a href="{% url 'dashboard_admin' %}" class="btn">
-        <i class="bi bi-arrow-left"></i> Volver
-    </a>
-    <h1>Agregar Marca</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" required>
-        </div>
-        <div class="mb-3">
-            <label for="logo" class="form-label">Logo</label>
-            <input type="file" class="form-control" id="logo" name="logo">
-        </div>
-        <button type="submit" class="btn btn-success">Guardar</button>
-    </form>
+<div class="d-flex" style="width: 100%;">
+    {% include 'bases/_sidebar.html' %}
+    <div class="container py-4">
+        <a href="{% url 'dashboard_admin' %}" class="btn">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <h1>Agregar Marca</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required>
+            </div>
+            <div class="mb-3">
+                <label for="logo" class="form-label">Logo</label>
+                <input type="file" class="form-control" id="logo" name="logo">
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

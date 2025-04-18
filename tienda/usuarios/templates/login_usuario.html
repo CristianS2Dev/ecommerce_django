@@ -3,41 +3,36 @@
 <link rel="stylesheet" href="{% static 'css/login.css' %}" />
 <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
 
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content login-modal">
-        <form action="{% url 'login' %}" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{{ request.path }}">
-  
-          <div class="modal-header border-0">
-            <h5 class="modal-title login-heading w-100 text-center" id="loginModalLabel">Iniciar Sesión</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content login-modal">
+              <form action="{% url 'login' %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <div class="modal-header border-0">
+                      <h5 class="modal-title login-heading w-100 text-center" id="loginModalLabel">Iniciar Sesión</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      <div class="form-floating mb-3">
+                          <input type="email" class="form-control" id="correo" name="correo" placeholder="Correo electrónico" required>
+                          <label for="correo">Correo electrónico</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                          <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder="Contraseña" required>
+                          <label for="contrasena">Contraseña</label>
+                      </div>
+                  </div>
+                  <div class="modal-footer border-0 flex-column">
+                      <button type="submit" class="btn loginBtn w-100">Iniciar Sesión</button>
+                      <p class="login-text mt-3">¿No tienes una cuenta? 
+                          <a href="#" data-bs-toggle="modal" data-bs-target="#registroModal" onclick="cerrarLoginModal()">Inscríbete</a>
+                      </p>
+                  </div>
+              </form>
           </div>
-  
-          <div class="modal-body">
-            <div class="form-floating mb-3">
-              <input type="email" class="form-control" id="correo" name="correo" placeholder="Correo electrónico" required>
-              <label for="correo">Correo electrónico</label>
-            </div>
-  
-            <div class="form-floating mb-3">
-              <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder="Contraseña" required>
-              <label for="contrasena">Contraseña</label>
-            </div>
-          </div>
-  
-          <div class="modal-footer border-0 flex-column">
-            <button type="submit" class="btn loginBtn w-100">Iniciar Sesión</button>
-            <p class="login-text mt-3">¿No tienes una cuenta? 
-              <a href="#" data-bs-toggle="modal" data-bs-target="#registroModal" onclick="cerrarLoginModal()">Inscríbete</a>
-            </p>
-          </div>
-        </form>
       </div>
-    </div>
-  </div>
-  
+  </div>  
 
 <script src="{% static 'js/jquery.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>

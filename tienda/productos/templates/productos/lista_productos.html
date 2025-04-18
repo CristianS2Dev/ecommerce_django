@@ -9,13 +9,15 @@
         <!-- Sidebar de filtros -->
         <div class="col-md-3">
             <form method="get" class="bg-white p-4 shadow-sm rounded-3 mb-4">
+                <!-- Filtros de categoría, precio, marca y colores -->
                 <h5 class="fw-bold mb-4">Filtros</h5>
                 <!-- Categoría -->
                 <div class="mb-4">
                     <h6 class="text-muted">Categorías</h6>
-                    <select name="categoria" class="form-select" onchange="window.location.href=this.value;">
+                    <select name="categoria" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todas</option>
                         {% for categoria in categorias %}
-                            <option value="{% url 'products_by_category' categoria.id %}" {% if categoria == categoria %}selected{% endif %}>{{ categoria.nombre }}</option>
+                            <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == request.GET.categoria %}selected{% endif %}>{{ categoria.nombre }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -31,7 +33,7 @@
                     <select name="marca" class="form-select">
                         <option value="">Todas</option>
                         {% for marca in marcas_disponibles %}
-                            <option value="{{ marca.id }}" {% if marca.id|stringformat:"s" in request.GET.marca %}selected{% endif %}>{{ marca.nombre }}</option>
+                            <option value="{{ marca.id }}" {% if marca.id|stringformat:"s" == request.GET.marca %}selected{% endif %}>{{ marca.nombre }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -56,7 +58,13 @@
         <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold">
-                    {% if categoria %}{{ categoria.nombre }}{% else %}Todos los productos{% endif %}
+                    {% if request.GET.nombre %}
+                        Resultados para "{{ request.GET.nombre }}"
+                    {% elif categoria %}
+                        {{ categoria.nombre }}
+                    {% else %}
+                        Todos los productos
+                    {% endif %}
                 </h4>
                 <div class="mb-2 w-auto">
                     <select name="orden" class="form-select" onchange="this.form.submit()">

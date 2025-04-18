@@ -18,9 +18,28 @@
 
 ---
 
+## [v3.2.1-alpha.1] - 17-04-2025
+
+### Added
+
+- Se mejoran las opciones de filtrado en el listado de productos (categoría, precio, marca, color).
+
+### Changed
+
+- Se refactorizan los templates para mejorar el diseño y la integración de la barra lateral.
+- Se actualizan las vistas de gestión de productos y variantes para una mejor experiencia de usuario.
+- Se ajusta el comportamiento del modal de inicio de sesión para un manejo adecuado de la sesión.
+
+### Fixed
+
+- Se modifica el campo `imagen_perfil` en el modelo `usuario` para permitir valores nulos y establecer una ruta de imagen por defecto.
+
+---
+
 ## [v3.1.1-alpha.1] - 17-04-2025
 
 ### Added
+
 - Se implementan vistas y URLs para gestionar variantes de productos (añadir, editar, eliminar).
 - Se agrega paginación a la vista de listado de productos e integración de opciones de filtrado (categoría, precio, marca, color).
 - Se mejora la vista de detalle de productos para mostrar variantes disponibles y su stock.
@@ -28,6 +47,7 @@
 - Se añaden estilos CSS para colores y tallas seleccionados.
 
 ### Changed
+
 - Se actualizan las vistas de gestión de productos para manejar variantes durante la creación y edición de productos.
 - Se mejora la interfaz de usuario para la selección de colores y tallas en las páginas de detalle de productos.
 - Se refactorizan los templates para optimizar las vistas de listado y detalle de productos.

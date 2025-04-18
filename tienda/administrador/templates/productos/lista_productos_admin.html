@@ -3,87 +3,99 @@
 {% block titulo %}Lista de Productos{% endblock %}
 
 {% block main %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver
-        </a>
-        <h2 class="mb-0 text-center flex-grow-1">Lista de Productos</h2>
-        <a href="{% url 'agregar_producto' %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Agregar Producto
-        </a>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-hover align-middle text-center">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Color</th>
-                    <th>Talla</th>
-                    <th>Stock</th>
-                    <th>Marca</th>
-                    <th>SKU</th>
-                    <th>Etiquetas</th>
-                    <th>Imagen</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in data %}
-                    {% with producto.variantes.all as variantes_producto %}
-                        {% for variante in variantes_producto %}
-                        <tr>
-                            {% if forloop.first %}
-                                <td rowspan="{{ variantes_producto|length }}">{{ producto.id }}</td>
-                                <td rowspan="{{ variantes_producto|length }}" class="fw-bold">{{ producto.nombre }}</td>
-                                <td rowspan="{{ variantes_producto|length }}">
-                                    <span class="text-success">${{ producto.precio|floatformat:2 }}</span>
-                                </td>
-                            {% endif %}
-
-                            <td>
-                                <span class="badge rounded-pill text-dark" style="background-color: {{ variante.color }};">
-                                    {{ variante.color }}
-                                </span>
-                            </td>
-                            <td>{{ variante.talla }}</td>
-                            <td>{{ variante.stock }}</td>
-
-                            {% if forloop.first %}
-                                <td rowspan="{{ variantes_producto|length }}">{{ producto.marca.nombre }}</td>
-                                <td rowspan="{{ variantes_producto|length }}">{{ producto.sku }}</td>
-                                <td rowspan="{{ variantes_producto|length }}">
-                                    {% for etiqueta in producto.etiquetas.all %}
-                                        <span class="badge bg-info text-dark me-1">{{ etiqueta.nombre }}</span>
-                                    {% endfor %}
-                                </td>
-                                <td rowspan="{{ variantes_producto|length }}">
-                                    {% if producto.imagen %}
-                                        <img src="{{ producto.imagen.url }}" alt="Imagen del producto"
-                                            class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+<div class="d-flex" style="width: 100%;">
+    {% include 'bases/_sidebar.html' %}
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <h2 class="mb-0 text-center flex-grow-1">Lista de Productos</h2>
+            <a href="{% url 'agregar_producto' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Agregar Producto
+            </a>
+        </div>
+    
+        <div class="table-responsive">
+            <table class="table table-hover align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Color</th>
+                        <th>Talla</th>
+                        <th>Stock</th>
+                        <th>Marca</th>
+                        <th>SKU</th>
+                        <th>Etiquetas</th>
+                        <th>Imagen</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in data %}
+                        {% with producto.variantes.all as variantes_producto %}
+                            {% for variante in variantes_producto %}
+                            <tr>
+                                {% if forloop.first %}
+                                    {% if variantes_producto %}
+                                        <td rowspan="{{ variantes_producto|length }}">{{ producto.id }}</td>
+                                        <td rowspan="{{ variantes_producto|length }}" class="fw-bold">{{ producto.nombre }}</td>
+                                        <td rowspan="{{ variantes_producto|length }}">
+                                            <span class="text-success">${{ producto.precio|floatformat:2 }}</span>
+                                        </td>
                                     {% else %}
-                                        <span class="text-muted">Sin imagen</span>
+                                        <td>{{ producto.id }}</td>
+                                        <td class="fw-bold">{{ producto.nombre }}</td>
+                                        <td>
+                                            <span class="text-success">${{ producto.precio|floatformat:2 }}</span>
+                                        </td>
                                     {% endif %}
+                                {% endif %}
+    
+                                <td>
+                                    <span class="badge rounded-pill text-dark" style="background-color: {{ variante.color }};">
+                                        {{ variante.color }}
+                                    </span>
                                 </td>
-                                <td rowspan="{{ variantes_producto|length }}">
-                                    <a href="{% url 'editar_producto' producto.id %}" class="btn btn-sm btn-warning mb-1">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-sm btn-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </td>
-                            {% endif %}
-                        </tr>
-                        {% endfor %}
-                    {% endwith %}
-                {% endfor %}
-            </tbody>
-        </table>
+                                <td>{{ variante.talla }}</td>
+                                <td>{{ variante.stock }}</td>
+    
+                                {% if forloop.first %}
+                                    <td rowspan="{{ variantes_producto|length }}">{{ producto.marca.nombre }}</td>
+                                    <td rowspan="{{ variantes_producto|length }}">{{ producto.sku }}</td>
+                                    <td rowspan="{{ variantes_producto|length }}">
+                                        {% for etiqueta in producto.etiquetas.all %}
+                                            <span class="badge bg-info text-dark me-1">{{ etiqueta.nombre }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td rowspan="{{ variantes_producto|length }}">
+                                        {% if producto.imagen %}
+                                            <img src="{{ producto.imagen.url }}" alt="Imagen del producto"
+                                                class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                        {% else %}
+                                            <span class="text-muted">Sin imagen</span>
+                                        {% endif %}
+                                    </td>
+                                    <td rowspan="{{ variantes_producto|length }}">
+                                        <a href="{% url 'editar_producto' producto.id %}" class="btn btn-sm btn-warning mb-1">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+    
 </div>
 
 {% endblock %}

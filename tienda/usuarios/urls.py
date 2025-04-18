@@ -13,7 +13,8 @@ urlpatterns = [
 
     path('address/', views.address, name='address'),
     path('address/add/', views.add_address, name='add_address'),
-    path('address/update/<int:id>/', views.update_address, name='update_address'),
+    path('main_address/<int:id_address>/', views.set_primary_address, name='set_primary_address'),
+    path('address/update/<int:id_direccion>/', views.update_address, name='update_address'),
     path('address/delete/<int:id>/', views.delete_address, name='delete_address'),
     
 
