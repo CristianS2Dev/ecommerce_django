@@ -5,14 +5,14 @@
 
 {% block main %}
 <div class="container my-5">
-        {% if form.errors %}
-    <div class="alert alert-danger">
-        <ul>
-            {% for field, errors in form.errors.items %}
-                <li>{{ field }}: {{ errors|join:", " }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
      <!-- Breadcrumb -->
      {% render_breadcrumbs breadcrumbs %}
@@ -21,15 +21,11 @@
         <div class="col-md-4 col-lg-3 mb-4">
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body text-center">
-                    {% if usuario.imagen_perfil %}
-                        <img src="{{ usuario.imagen_perfil.url }}" alt="user"
-                             class="rounded-circle mb-2"
-                             style="width: 80px; height: 80px; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'assets/user-icon.png' %}" alt="user"
-                             class="rounded-circle mb-2"
-                             style="width: 80px; height: 80px; object-fit: cover;">
-                    {% endif %}
+                    {% if imagen_perfil_url %}
+                    <img src="{{ imagen_perfil_url }}" alt="Imagen de perfil" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'images/default_profile.png' %}" alt="Imagen predeterminada" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                {% endif %}
                     <h6 class="mb-0">Hello! {{ usuario.nombre }}</h6>
                     <small class="text-muted">{{ usuario.correo }}</small>
                 </div>
@@ -60,7 +56,10 @@
 
                 <div class="text-center mb-4">
                     <div class="position-relative d-inline-block">
-                        <img id="preview-image" src="{{ usuario.imagen_perfil.url }}" class="rounded-circle shadow border" style="width: 120px; height: 120px; object-fit: cover;">
+                            <img id="preview-image" 
+                             src="{% if usuario.imagen_perfil and usuario.imagen_perfil.url %}{{ usuario.imagen_perfil.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" 
+                             class="rounded-circle shadow border" 
+                             style="width: 120px; height: 120px; object-fit: cover;">
                         
                         <label for="id_imagen_perfil" class="btn bg-dark text-light btn-sm position-absolute bottom-0 end-0 rounded-circle"style="cursor: pointer;">
                             <i class="bi bi-camera-fill "></i>

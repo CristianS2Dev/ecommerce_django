@@ -23,7 +23,7 @@ class Usuario(models.Model):
         (2, "Cliente"),
     )
     rol = models.IntegerField(choices=ROLES, default=2)
-    imagen_perfil = models.ImageField(upload_to='usuarios/', null=True, blank=True)  # Campo para la foto de perfil
+    imagen_perfil = models.ImageField(upload_to='perfiles/', blank=True, null=True, default='perfiles/default.png')
 
     def __str__(self):
         return self.nombre

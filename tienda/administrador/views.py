@@ -8,7 +8,7 @@ from django.contrib import messages
 from .forms import VarianteForm 
 import json
 from django.core.paginator import Paginator
-
+from tienda.administrador.forms import ProductoForm, VarianteFormSet
 
 
 
@@ -74,71 +74,77 @@ def lista_productos_admin(request):
 @session_rol_permission(1)
 def agregar_producto(request):
     """Agrega un nuevo producto."""
-    if request.method == "POST":
-        # Obtener datos del formulario
-        nombre = request.POST.get("nombre")
-        descripcion = request.POST.get("descripcion")
-        precio_original = request.POST.get("precio_original", "0")
-        descuento = request.POST.get("descuento", "0")
-        en_oferta = request.POST.get("en_oferta") == "on"
-        sku = request.POST.get("sku")
-        etiquetas_ids = request.POST.getlist("etiquetas")
-        categoria_id = request.POST.get("categoria")
-        marca_id = request.POST.get("marca")
-        imagenes = request.FILES.getlist("imagenes")
-
-        try:
-            # Crear el producto
-            producto = Producto(
-                nombre=nombre,
-                descripcion=descripcion,
-                precio_original=Decimal(precio_original),
-                descuento=Decimal(descuento),
-                en_oferta=en_oferta,
-                sku=sku,
-                categoria=Categoria.objects.get(id=categoria_id) if categoria_id else None,
-                marca=Marca.objects.get(id=marca_id) if marca_id else None,
-            )
-            producto.save()
-
-            # Guardar etiquetas asociadas al producto
-            if etiquetas_ids:
-                producto.etiquetas.set(etiquetas_ids)
-
-            # Procesar variantes
-            for key, value in request.POST.items():
-                if key.startswith("variantes"):
-                    index = key.split("[")[1].split("]")[0]
-                    color = request.POST.get(f"variantes[{index}][color]")
-                    talla = request.POST.get(f"variantes[{index}][talla]")
-                    stock = request.POST.get(f"variantes[{index}][stock]", 0)
-                    if color and talla:
-                        Variante.objects.create(
-                            producto=producto,
-                            color=color,
-                            talla=talla,
-                            stock=int(stock),
-                        )
-
-            # Guardar imágenes asociadas al producto
-            for imagen in imagenes:
-                ImagenProducto.objects.create(producto=producto, imagen=imagen)
-
-            messages.success(request, 'Producto agregado correctamente')
-            return redirect('lista_productos_admin')
-        except Exception as e:
-            messages.error(request, f"Error: {e}")
-
-    # Si ocurre un error, renderizar el formulario nuevamente
     categorias = Categoria.objects.all()
     marcas = Marca.objects.all()
     etiquetas = Etiqueta.objects.all()
+
+    if request.method == "POST":
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            try:
+                producto = form.save(commit=False)
+                producto.save()
+
+                # Guardar etiquetas
+                etiquetas_ids = request.POST.getlist("etiquetas")
+                if etiquetas_ids:
+                    producto.etiquetas.set(etiquetas_ids)
+
+                # Guardar variantes
+                formset = VarianteFormSet(request.POST, instance=producto)
+                if formset.is_valid():
+                    formset.save()
+                else:
+                    for i, formset_error in enumerate(formset.errors):
+                        for field, error in formset_error.items():
+                            messages.error(request, f"Error en variante {i+1} - '{field}': {error}")
+                    messages.error(request, "Hay errores en el formulario de variantes.")
+                    return render(request, "productos/agregar_producto.html", {
+                        'form': form,
+                        'formset': formset,
+                        'categorias': categorias,
+                        'marcas': marcas,
+                        'etiquetas': etiquetas,
+                    })
+
+                # Guardar imágenes
+                imagenes = request.FILES.getlist("imagenes")
+                for imagen in imagenes:
+                    ImagenProducto.objects.create(producto=producto, imagen=imagen)
+
+                messages.success(request, 'Producto agregado correctamente')
+                return redirect('lista_productos_admin')
+            except Exception as e:
+                messages.error(request, f"Error: {e}")
+                formset = VarianteFormSet(request.POST)  # sin instancia
+        else:
+            # Si el form no es válido, crea el formset sin instancia
+            formset = VarianteFormSet(request.POST)
+
+            if form.errors:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Error en '{field}': {error}")
+
+        return render(request, "productos/agregar_producto.html", {
+            'form': form,
+            'formset': formset,
+            'categorias': categorias,
+            'marcas': marcas,
+            'etiquetas': etiquetas,
+        })
+
+    else:
+        form = ProductoForm()
+        formset = VarianteFormSet()
+
     return render(request, "productos/agregar_producto.html", {
+        'form': form,
+        'formset': formset,
         'categorias': categorias,
         'marcas': marcas,
         'etiquetas': etiquetas,
     })
-
 
 
 @session_rol_permission(1)
@@ -150,72 +156,56 @@ def editar_producto(request, id_producto):
         messages.error(request, "Producto no encontrado")
         return redirect('lista_productos_admin')
 
-    if request.method == "POST":
-        nombre = request.POST.get("nombre")
-        descripcion = request.POST.get("descripcion")
-        precio_original = request.POST.get("precio_original", "0")
-        descuento = request.POST.get("descuento", "0")
-        en_oferta = request.POST.get("en_oferta") == "on"
-        sku = request.POST.get("sku")
-        etiquetas_ids = request.POST.getlist("etiquetas")
-        categoria_id = request.POST.get("categoria")
-        marca_id = request.POST.get("marca")
-        imagenes = request.FILES.getlist("imagenes")
-
-        try:
-            # Actualizar datos del producto
-            producto.nombre = nombre
-            producto.descripcion = descripcion
-            producto.precio_original = Decimal(precio_original)
-            producto.descuento = Decimal(descuento)
-            producto.en_oferta = en_oferta
-            producto.sku = sku
-            producto.categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
-            producto.marca = Marca.objects.get(id=marca_id) if marca_id else None
-            producto.save()
-
-            # Actualizar etiquetas
-            producto.etiquetas.set(etiquetas_ids)
-
-            # Actualizar variantes
-            producto.variantes.all().delete()  # Eliminar variantes existentes
-            variantes = [key for key in request.POST if key.startswith("variantes")]
-            processed_indices = set()  # Para evitar procesar índices duplicados
-            for key in variantes:
-                index = key.split("[")[1].split("]")[0]
-                if index not in processed_indices:
-                    processed_indices.add(index)
-                    color = request.POST.get(f"variantes[{index}][color]")
-                    talla = request.POST.get(f"variantes[{index}][talla]")
-                    stock = request.POST.get(f"variantes[{index}][stock]", 0)
-                    if color and talla:
-                        Variante.objects.create(
-                            producto=producto,
-                            color=color,
-                            talla=talla,
-                            stock=int(stock),
-                        )
-
-            # Actualizar imágenes
-            for imagen in imagenes:
-                ImagenProducto.objects.create(producto=producto, imagen=imagen)
-
-            messages.success(request, "Producto actualizado correctamente")
-            return redirect('lista_productos_admin')
-        except Exception as e:
-            messages.error(request, f"Error: {e}")
-
-    # Renderizar el formulario con los datos actuales
     categorias = Categoria.objects.all()
     marcas = Marca.objects.all()
     etiquetas = Etiqueta.objects.all()
-    variantes = producto.variantes.all()
+
+    if request.method == "POST":
+        form = ProductoForm(request.POST, instance=producto)
+        formset = VarianteFormSet(request.POST or None, instance=producto)
+
+        if form.is_valid() and formset.is_valid():
+            try:
+                form.save()
+
+                # Actualizar etiquetas
+                etiquetas_ids = request.POST.getlist("etiquetas")
+                producto.etiquetas.set(etiquetas_ids)
+
+                # Guardar variantes (sin borrar)
+                formset.save()
+
+                # Agregar nuevas imágenes
+                imagenes = request.FILES.getlist("imagenes")
+                for imagen in imagenes:
+                    ImagenProducto.objects.create(producto=producto, imagen=imagen)
+
+                messages.success(request, "Producto actualizado correctamente")
+                return redirect('lista_productos_admin')
+            except Exception as e:
+                messages.error(request, f"Error: {e}")
+        else:
+           # Mostrar errores específicos de los formularios
+            if form.errors:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Error en '{field}': {error}")
+            if formset.errors:
+                for i, formset_error in enumerate(formset.errors):
+                    for field, error in formset_error.items():
+                        messages.error(request, f"Error en variante {i+1} - '{field}': {error}")
+            messages.error(request, "Hay errores en el formulario.")
+    else:
+        form = ProductoForm(instance=producto)
+        formset = VarianteFormSet(instance=producto)
+
     return render(request, "productos/agregar_producto.html", {
+        'form': form,
+        'formset': formset,
         'dato': producto,
         'categorias': categorias,
         'marcas': marcas,
         'etiquetas': etiquetas,
-        'variantes': variantes,
         'nombre': producto.nombre,
         'descripcion': producto.descripcion,
         'precio_original': producto.precio_original,

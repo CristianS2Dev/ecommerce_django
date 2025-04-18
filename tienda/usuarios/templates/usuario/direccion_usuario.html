@@ -6,22 +6,27 @@
 
 {% block main %}
 <div class="container my-5">
-    <!-- Breadcrumb -->
-    {% render_breadcrumbs breadcrumbs %}
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+<!-- Breadcrumb -->
+{% render_breadcrumbs breadcrumbs %}
     <div class="row">
           <!-- Sidebar -->
           <div class="col-md-4 col-lg-3 mb-4">
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body text-center">
-                    {% if usuario.imagen_perfil %}
-                        <img src="{{ usuario.imagen_perfil.url }}" alt="user"
-                             class="rounded-circle mb-2"
-                             style="width: 80px; height: 80px; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'assets/user-icon.png' %}" alt="user"
-                             class="rounded-circle mb-2"
-                             style="width: 80px; height: 80px; object-fit: cover;">
-                    {% endif %}
+                    {% if imagen_perfil_url %}
+                    <img src="{{ imagen_perfil_url }}" alt="Imagen de perfil" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'images/default_profile.png' %}" alt="Imagen predeterminada" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                {% endif %}
                     <h6 class="mb-0">Hello! {{ usuario.nombre }}</h6>
                     <small class="text-muted">{{ usuario.correo }}</small>
                 </div>
@@ -80,18 +85,16 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="{% url 'editar_direccion_usuario' direccion.id %}">Editar</a>
+                                        <a class="dropdown-item" href="{% url 'update_address' direccion.id %}">Editar</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item text-danger" href="{% url 'eliminar_direccion_usuario' direccion.id %}">Eliminar</a>
+                                        <a class="dropdown-item text-danger" href="{% url 'delete_address' direccion.id %}">Eliminar</a>
                                     </li>
-                                    {% if not direccion.principal %}
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'establecer_direccion_principal' direccion.id %}">
-                                            Establecer como Predeterminada
-                                        </a>
-                                    </li>
-                                    {% endif %}
+                                        <li>
+                                            <a href="{% url 'set_primary_address' direccion.id %}" class="dropdown-item">
+                                                Establecer como Predeterminada
+                                            </a>
+                                        </li>
                                 </ul>
                             </div>
                         </div>

@@ -32,9 +32,9 @@
           </li>
         </ul>
   
-        <form class="d-flex me-lg-3 my-2 my-lg-0" role="search">
-          <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Search">
-          <button class="btn btn-outline-primary" type="submit">Buscar</button>
+        <form action="{% url 'list_products' %}" method="get" class="d-flex">
+            <input class="form-control me-2" type="search" name="nombre" placeholder="Buscar productos..." aria-label="Buscar">
+            <button class="btn btn-outline-success" type="submit">Buscar</button>
         </form>
   
         <ul class="navbar-nav mb-2 mb-lg-0">

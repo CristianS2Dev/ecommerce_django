@@ -3,156 +3,224 @@
 
 {% block titulo %}Agregar Producto{% endblock %}
 
-
 {% block main %}
+<style>
+    .variante-item input[type="checkbox"][name$="DELETE"] {
+        display: none;
+    }
+</style>
 {% if request.session.pista %}
-<div class="container justify-content-center">
-    <a href="{% url 'lista_productos_admin' %}" class="btn">
-        <i class="bi bi-arrow-left"></i> Volver
-    </a>
-    {% if dato %}
-        <h1>Actualizar Producto {{ dato }}</h1>
-    {% else %}
-        <h1>Agregar Producto</h1>
+<div class="d-flex" style="width: 100%;">
+    <!-- ...existing code... -->
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
     {% endif %}
-    <div class="row">
-        <div class="card p-3">
-            <form action="{% if dato %}{% url 'editar_producto' dato.id %}{% else %}{% url 'agregar_producto' %}{% endif %}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <!-- Campos del producto -->
-                <div class="form-group mb-3">
-                    <label class="mb-2" for="nombreProducto">Nombre del producto</label>
-                    <input type="text" class="form-control" id="nombreProducto" name="nombre" placeholder="Nombre del producto" value="{{ nombre }}" required>
-                </div>
-                <div class="form-group mb-3">
-                    <label class="mb-2" for="descripcionProducto">Descripción del producto</label>
-                    <textarea class="form-control" id="descripcionProducto" name="descripcion" rows="3" required>{{ descripcion }}</textarea>
-                </div>
-                <div class="form-group mb-3">
-                    <label class="mb-2" for="precioProducto">Precio Original</label>
-                    <input type="number" class="form-control" id="precioProducto" name="precio_original" min="0" step="0.01" placeholder="Ingrese precio" value="{{ precio_original }}" required>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="enOferta">En Oferta</label>
-                    <input type="checkbox" id="enOferta" name="en_oferta" class="form-check-input" {% if en_oferta %}checked{% endif %}>
-                </div>
-                <div class="form-group mb-3">
-                    <label class="mb-2" for="precioDescuento">Descuento (%)</label>
-                    <input type="number" class="form-control" id="precioDescuento" name="descuento" min="0" placeholder="Ingrese descuento" value="{{ descuento }}">
-                </div>
-                <div class="form-group mb-3">
-                    <label class="mb-2" for="skuProducto">SKU</label>
-                    <input type="text" class="form-control" id="skuProducto" name="sku" placeholder="SKU del producto" value="{{ sku }}" required>
-                </div>
-                <div class="mb-3">
-                    <label for="marca" class="form-label">Marca</label>
-                    <select id="marca" name="marca" class="form-select" required>
-                        <option value="">Seleccione una marca</option>
-                        {% for marca in marcas %}
-                            <option value="{{ marca.id }}" {% if marca.id == marca_id %}selected{% endif %}>{{ marca.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group mb-3">
-                    <label class="mb-2" for="categoriaProducto">Categoría</label>
-                    <select class="form-control" id="categoriaProducto" name="categoria" required>
-                        {% for categoria in categorias %}
-                            <option value="{{ categoria.id }}" {% if categoria.id == categoria_id %}selected{% endif %}>{{ categoria.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group mb-3">
-                    <label class="mb-2" for="etiquetasProducto">Etiquetas</label>
-                    <select class="form-control" id="etiquetasProducto" name="etiquetas" multiple>
-                        {% for etiqueta in etiquetas %}
-                            <option value="{{ etiqueta.id }}" {% if etiqueta.id in etiquetas_ids %}selected{% endif %}>{{ etiqueta.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="imagenes" class="form-label">Imágenes (máximo 5)</label>
-                    <input class="form-control border p-3" type="file" id="imagenes" name="imagenes" multiple accept=".jpeg,.jpg,.png,.webp">
-                </div>
-                <!-- Variantes -->
-                <div class="form-group mb-3">
-                    <label class="mb-2">Variantes</label>
-                    <div id="variantesContainer">
-                        {% for variante in variantes %}
-                        <div class="variante-item mb-3">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <input type="color" class="form-control" name="variantes[{{ forloop.counter0 }}][color]" value="{{ variante.color }}" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="text" class="form-control" name="variantes[{{ forloop.counter0 }}][talla]" value="{{ variante.talla }}" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="number" class="form-control" name="variantes[{{ forloop.counter0 }}][stock]" value="{{ variante.stock }}" min="0" required>
-                                </div>
-                                <div class="col-md-1">
-                                    <button type="button" class="btn btn-danger removeVarianteBtn">&times;</button>
-                                </div>
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger">
+            <ul>
+            {% for error in formset.non_form_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <!-- ...existing code... -->
+    {% include 'bases/_sidebar.html' %}
+    <div class="container py-4">
+        <div class="container justify-content-center">
+        <a href="{% url 'lista_productos_admin' %}" class="btn">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        {% if dato %}
+            <h1>Actualizar Producto {{ dato }}</h1>
+        {% else %}
+            <h1>Agregar Producto</h1>
+        {% endif %}
+        <div class="row">
+            <div class="card p-4 shadow-sm">
+                <form action="{% if dato %}{% url 'editar_producto' dato.id %}{% else %}{% url 'agregar_producto' %}{% endif %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ formset.management_form }}
+            
+                    <h5 class="mb-4 border-bottom pb-2">Información del producto</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form.nombre|add_class:"form-control" }}
+                                <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                            </div>
+                            {% if form.nombre.errors %}<div class="text-danger">{{ form.nombre.errors }}</div>{% endif %}
+                        </div>
+            
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form.sku|add_class:"form-control" }}
+                                <label for="{{ form.sku.id_for_label }}">{{ form.sku.label }}</label>
+                            </div>
+                            {% if form.sku.errors %}<div class="text-danger">{{ form.sku.errors }}</div>{% endif %}
+                        </div>
+            
+                        <div class="col-12">
+                            <label class="form-label">{{ form.descripcion.label }}</label>
+                            {{ form.descripcion|add_class:"form-control" }}
+                            {% if form.descripcion.errors %}<div class="text-danger">{{ form.descripcion.errors }}</div>{% endif %}
+                        </div>
+            
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                {{ form.precio_original|add_class:"form-control" }}
+                                <label for="{{ form.precio_original.id_for_label }}">{{ form.precio_original.label }}</label>
                             </div>
                         </div>
+            
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                {{ form.descuento|add_class:"form-control" }}
+                                <label for="{{ form.descuento.id_for_label }}">{{ form.descuento.label }}</label>
+                            </div>
+                        </div>
+            
+                        <div class="col-md-4 d-flex align-items-center mt-2">
+                            <div class="form-check">
+                                {{ form.en_oferta|add_class:"form-check-input" }}
+                                <label class="form-check-label" for="{{ form.en_oferta.id_for_label }}">
+                                    {{ form.en_oferta.label }}
+                                </label>
+                            </div>
+                        </div>
+            
+                        <div class="col-md-4">
+                            {{ form.categoria.label_tag }}
+                            {{ form.categoria|add_class:"form-select" }}
+                        </div>
+            
+                        <div class="col-md-4">
+                            {{ form.marca.label_tag }}
+                            {{ form.marca|add_class:"form-select" }}
+                        </div>
+            
+                        <div class="col-md-4">
+                            {{ form.etiquetas.label_tag }}
+                            {{ form.etiquetas|add_class:"form-select" }}
+                        </div>
+            
+                        <div class="col-12">
+                            <label class="form-label">Imágenes</label>
+                            <input type="file" name="imagenes" id="id_imagenes" class="form-control" multiple>
+                        </div>
+                    </div>
+            
+                    <hr class="my-4">
+            
+                    <h5 class="mb-3">Variantes</h5>
+                    <div id="variantesContainer">
+                        {% for form in formset %}
+                            <div class="variante-item mb-3 border p-3 rounded">
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        {{ form.color.label_tag }} {{ form.color }}
+                                        {% if form.color.errors %}
+                                            <div class="text-danger">{{ form.color.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.talla.label_tag }} {{ form.talla }}
+                                        {% if form.talla.errors %}
+                                            <div class="text-danger">{{ form.talla.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form.stock.label_tag }} {{ form.stock }}
+                                        {% if form.stock.errors %}
+                                            <div class="text-danger">{{ form.stock.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        {% if formset.can_delete %}
+                                            {{ form.DELETE }} <span class="btn btn-danger removeVarianteBtn">&times;</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-primary mt-2" id="addVarianteBtn">Agregar Variante</button>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'dashboard_admin' %}" class="btn btn-danger">Cancelar</a>
-                    <button type="submit" class="btn {% if dato %}btn-info{% else %}btn-success{% endif %}">
-                        {% if dato %}Actualizar{% else %}Guardar{% endif %}
-                    </button>
-                </div>
-            </form>
+                    <button type="button" class="btn btn-outline-primary mt-2" id="addVarianteBtn">Agregar Variante</button>
+            
+                    <div class="d-flex justify-content-end mt-4 gap-2">
+                        <a href="{% url 'lista_productos_admin' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Guardar Producto</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
         </div>
     </div>
 </div>
 
-<!-- Template JS para variante nueva -->
-<script type="text/template" id="varianteTemplate">
-    <div class="variante-item mb-3">
+<!-- Formulario vacío oculto para clonar variantes dinámicamente -->
+<div id="empty-form" style="display: none;">
+    <div class="variante-item mb-3 border p-3 rounded">
+        {% for hidden in formset.empty_form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
         <div class="row">
             <div class="col-md-4">
-                <input type="color" class="form-control" name="variantes[__INDEX__][color]" required>
+                {{ formset.empty_form.color.label_tag }} {{ formset.empty_form.color|add_class:"form-control" }}
             </div>
             <div class="col-md-4">
-                <input type="text" class="form-control" name="variantes[__INDEX__][talla]" placeholder="Talla" required>
+                {{ formset.empty_form.talla.label_tag }} {{ formset.empty_form.talla|add_class:"form-control" }}
             </div>
             <div class="col-md-3">
-                <input type="number" class="form-control" name="variantes[__INDEX__][stock]" min="0" placeholder="Stock" required>
+                {{ formset.empty_form.stock.label_tag }} {{ formset.empty_form.stock|add_class:"form-control" }}
             </div>
-            <div class="col-md-1">
-                <button type="button" class="btn btn-danger removeVarianteBtn">&times;</button>
+            <div class="col-md-1 d-flex align-items-end">
+                {% if formset.can_delete %}
+                    {{ formset.empty_form.DELETE }} <span class="btn btn-danger removeVarianteBtn">&times;</span>
+                {% endif %}
             </div>
         </div>
     </div>
-</script>
+</div>
 
-<!-- Script para manejar variantes dinámicamente -->
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const variantesContainer = document.getElementById('variantesContainer');
     const addVarianteBtn = document.getElementById('addVarianteBtn');
-    const varianteTemplate = document.getElementById('varianteTemplate').innerHTML;
-
-    let varianteIndex = variantesContainer.children.length;
+    // Busca el campo TOTAL_FORMS sin importar el prefijo
+    const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
+    const emptyFormDiv = document.getElementById('empty-form').innerHTML;
 
     addVarianteBtn.addEventListener('click', function () {
-        const newVarianteHTML = varianteTemplate.replace(/__INDEX__/g, varianteIndex);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = newVarianteHTML;
-        variantesContainer.appendChild(tempDiv.firstElementChild);
-        varianteIndex++;
+        const currentFormCount = parseInt(totalForms.value);
+        let newFormHtml = emptyFormDiv.replace(/__prefix__/g, currentFormCount);
+        variantesContainer.insertAdjacentHTML('beforeend', newFormHtml);
+        totalForms.value = currentFormCount + 1;
     });
 
     variantesContainer.addEventListener('click', function (e) {
         if (e.target.classList.contains('removeVarianteBtn')) {
-            e.target.closest('.variante-item').remove();
+            const varianteItem = e.target.closest('.variante-item');
+            if (varianteItem) {
+                varianteItem.remove();
+                // Opcional: podrías actualizar totalForms aquí si quieres evitar huecos
+            }
         }
     });
 });
 </script>
+
 {% endif %}
 {% endblock %}

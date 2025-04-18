@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block titulo %}...{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <link rel="stylesheet" href="{% static 'css/bootstrap-icons.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
 </head>
@@ -74,55 +73,74 @@
             </div>
         </div>
         <div class="text-center py-4 border-top">
-            <p>@ 2025 Todos los derechos reservador por Juan Camilo</p>
+            <p>@ 2025 Todos los derechos reservados por Juan Camilo</p>
         </div>
     </footer>
     
     <!-- Scripts de Bootstrap y jQuery -->	
-    {% include 'login_usuario.html' %}
-    {% include 'registro_usuario.html' %}
-    <script src="{% static 'js/app.js' %}"></script>
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/jquery.min.js' %}"></script>
+{% include 'login_usuario.html' %}
+{% include 'registro_usuario.html' %}
+<script src="{% static 'js/app.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+
+
 
 
 <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        // Mostrar el modal de login si hay un error relacionado con el inicio de sesión
+    document.addEventListener('DOMContentLoaded', function () {
         const loginError = document.querySelector('.alert-danger.login_error');
-        if (loginError) {
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        const loginModalEl = document.getElementById('loginModal');
+        const registroModalEl = document.getElementById('registroModal');
+        let loginModal, registroModal;
+
+        if (loginModalEl) loginModal = new bootstrap.Modal(loginModalEl);
+        if (registroModalEl) registroModal = new bootstrap.Modal(registroModalEl);
+
+        // Mostrar el modal de login si hay un error relacionado con el inicio de sesión
+        if (loginError && loginModal) {
             loginModal.show();
         }
-    
-        // Función para cerrar el modal de login antes de abrir el de registro
+
+        // Cerrar el modal de login antes de abrir el de registro
         const cerrarLoginModal = () => {
-            const loginModalInstance = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-            if (loginModalInstance) {
-                loginModalInstance.hide();
+            if (loginModalEl) {
+                const loginModalInstance = bootstrap.Modal.getInstance(loginModalEl);
+                if (loginModalInstance) {
+                    loginModalInstance.hide();
+                }
             }
         };
-    
+
         // Asignar el evento al enlace "Inscríbete"
         const inscribeteLink = document.querySelector('[data-bs-target="#registroModal"]');
         if (inscribeteLink) {
             inscribeteLink.addEventListener('click', cerrarLoginModal);
         }
-    
-        // Eliminar el fondo oscuro residual al cerrar cualquier modal
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            modal.addEventListener('hidden.bs.modal', function () {
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove(); // Elimina el fondo oscuro residual
-                }
-                document.body.classList.remove('modal-open'); // Elimina la clase que bloquea el scroll
-                document.body.style.overflow = ''; // Restaura el scroll
+
+        // Mostrar el modal de login solo si no está abierto el de registro
+        const urlParams = new URLSearchParams(window.location.search);
+        const next = urlParams.get('next');
+        if (next && loginModal && (!registroModalEl || !registroModalEl.classList.contains('show'))) {
+            loginModal.show();
+        }
+
+        // Cuando se abre el modal de registro, asegurarse de cerrar el de login
+        if (registroModalEl) {
+            registroModalEl.addEventListener('show.bs.modal', cerrarLoginModal);
+        }
+
+        // Limpiar backdrop y clase modal-open al cerrar el modal de registro
+        if (registroModalEl) {
+            registroModalEl.addEventListener('hidden.bs.modal', function () {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(b => b.parentNode.removeChild(b));
+                document.body.classList.remove('modal-open');
             });
-        });
+        }
     });
 </script>
+
 </body>
 
 </html>

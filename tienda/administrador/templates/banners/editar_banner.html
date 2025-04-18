@@ -1,39 +1,42 @@
 {% extends 'bases/_base_admin.html' %}
 {% block main %}
-<div class="container mt-4 mb-4">
-    <a href="{% url 'list_banners' %}" class="btn">
-        <i class="bi bi-arrow-left"></i> Volver
-    </a>
-    <h1 class="text-center">Editar Banner</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="titulo" class="form-label">Título</label>
-            <input type="text" class="form-control" id="titulo" name="titulo" value="{{ banner.titulo }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="imagen" class="form-label">Imagen</label>
-            <input type="file" class="form-control" id="imagen" name="imagen">
-            {% if banner.imagen %}
-            <img src="{{ banner.imagen.url }}" alt="{{ banner.titulo }}" class="img-thumbnail mt-2" style="max-width: 200px;">
-            {% endif %}
-        </div>
-        <div class="mb-3">
-            <label for="texto" class="form-label">Texto del Banner</label>
-            <textarea class="form-control" id="texto" name="texto" rows="3">{{ banner.texto }}</textarea>
-        </div>
-        <div class="mb-3">
-            <label for="color_texto" class="form-label">Color del Texto</label>
-            <input type="color" class="form-control form-control-color" id="color_texto" name="color_texto" value="{{ banner.color_texto }}" title="Elige un color">
-        </div>
-        <div class="mb-3">
-            <label for="tipo" class="form-label">Tipo de Banner</label>
-            <select class="form-select" id="tipo" name="tipo" required>
-                <option value="principal" {% if banner.tipo == "principal" %}selected{% endif %}>Principal</option>
-                <option value="secundario" {% if banner.tipo == "secundario" %}selected{% endif %}>Secundario</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-success">Guardar Cambios</button>
-    </form>
+<div class="d-flex" style="width: 100%;">
+    {% include 'bases/_sidebar.html' %}
+    <div class="container py-4">
+        <a href="{% url 'list_banners' %}" class="btn">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <h1 class="text-center">Editar Banner</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="titulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" value="{{ banner.titulo }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="imagen" class="form-label">Imagen</label>
+                <input type="file" class="form-control" id="imagen" name="imagen">
+                {% if banner.imagen %}
+                <img src="{{ banner.imagen.url }}" alt="{{ banner.titulo }}" class="img-thumbnail mt-2" style="max-width: 200px;">
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="texto" class="form-label">Texto del Banner</label>
+                <textarea class="form-control" id="texto" name="texto" rows="3">{{ banner.texto }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="color_texto" class="form-label">Color del Texto</label>
+                <input type="color" class="form-control form-control-color" id="color_texto" name="color_texto" value="{{ banner.color_texto }}" title="Elige un color">
+            </div>
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo de Banner</label>
+                <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="principal" {% if banner.tipo == "principal" %}selected{% endif %}>Principal</option>
+                    <option value="secundario" {% if banner.tipo == "secundario" %}selected{% endif %}>Secundario</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
