@@ -18,6 +18,25 @@
 
 ---
 
+## [v3.2.2-alpha.1] - 17-04-2025
+
+### Added
+
+- Se mejoran las opciones de filtrado en el listado de productos (categoría, precio, marca, color).
+
+### Changed
+
+- Se refactoriza la estructura del código para mejorar la legibilidad y el mantenimiento.
+- Se refactorizan los templates para mejorar el diseño y la integración de la barra lateral.
+- Se actualizan las vistas de gestión de productos y variantes para una mejor experiencia de usuario.
+- Se ajusta el comportamiento del modal de inicio de sesión para un manejo adecuado de la sesión.
+
+### Fixed
+
+- Se modifica el campo `imagen_perfil` en el modelo `usuario` para permitir valores nulos y establecer una ruta de imagen por defecto.
+
+---
+
 ## [v3.2.1-alpha.1] - 17-04-2025
 
 ### Added
