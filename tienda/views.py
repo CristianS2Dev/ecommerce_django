@@ -5,7 +5,7 @@ from .templatetags.breadcrumbs import *
 
 def index(request):
     q = Producto.objects.all()
-    marcas = Marca.objects.all()[:6]
+    marcas = Marca.objects.filter(visible=True)[:6]
     # banners_principales = Banner.objects.filter(tipo='principal')
     # banners_secundarios = Banner.objects.filter(tipo='secundario')
     context = {'data': q,

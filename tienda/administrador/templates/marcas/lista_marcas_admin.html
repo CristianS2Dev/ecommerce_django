@@ -37,8 +37,8 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'editar_marca' marca.id %}" class="btn btn-warning">Editar</a>
-                        <a href="{% url 'eliminar_marca' marca.id %}" class="btn btn-danger">Eliminar</a>
+                        <a href="{% url 'edit_brand' marca.id %}" class="btn btn-warning">Editar</a>
+                        <a href="{% url 'delete_brand' marca.id %}" class="btn btn-danger">Eliminar</a>
                     </td>
                 </tr>
                 {% endfor %}
