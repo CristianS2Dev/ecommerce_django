@@ -38,7 +38,6 @@
             </ul>
         </div>
     {% endif %}
-    <!-- ...existing code... -->
     {% include 'bases/_sidebar.html' %}
     <div class="container py-4">
         <div class="container justify-content-center">
@@ -79,7 +78,14 @@
                             {{ form.descripcion|add_class:"form-control" }}
                             {% if form.descripcion.errors %}<div class="text-danger">{{ form.descripcion.errors }}</div>{% endif %}
                         </div>
-            
+                        <div class="col-md-4 d-flex align-items-center mt-2">
+                            <div class="form-check">
+                                {{ form.en_oferta|add_class:"form-check-input" }}
+                                <label class="form-check-label" for="{{ form.en_oferta.id_for_label }}">
+                                    {{ form.en_oferta.label }}
+                                </label>
+                            </div>
+                        </div>
                         <div class="col-md-4">
                             <div class="form-floating">
                                 {{ form.precio_original|add_class:"form-control" }}
@@ -92,17 +98,7 @@
                                 {{ form.descuento|add_class:"form-control" }}
                                 <label for="{{ form.descuento.id_for_label }}">{{ form.descuento.label }}</label>
                             </div>
-                        </div>
-            
-                        <div class="col-md-4 d-flex align-items-center mt-2">
-                            <div class="form-check">
-                                {{ form.en_oferta|add_class:"form-check-input" }}
-                                <label class="form-check-label" for="{{ form.en_oferta.id_for_label }}">
-                                    {{ form.en_oferta.label }}
-                                </label>
-                            </div>
-                        </div>
-            
+                        </div>            
                         <div class="col-md-4">
                             {{ form.categoria.label_tag }}
                             {{ form.categoria|add_class:"form-select" }}
@@ -174,8 +170,6 @@
         </div>
     </div>
 </div>
-
-<!-- Formulario vacío oculto para clonar variantes dinámicamente -->
 <div id="empty-form" style="display: none;">
     <div class="variante-item mb-3 border p-3 rounded">
         {% for hidden in formset.empty_form.hidden_fields %}
@@ -205,7 +199,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const variantesContainer = document.getElementById('variantesContainer');
     const addVarianteBtn = document.getElementById('addVarianteBtn');
-    // Busca el campo TOTAL_FORMS sin importar el prefijo
     const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
     const emptyFormDiv = document.getElementById('empty-form').innerHTML;
 
@@ -220,8 +213,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.classList.contains('removeVarianteBtn')) {
             const varianteItem = e.target.closest('.variante-item');
             if (varianteItem) {
-                varianteItem.remove();
-                // Opcional: podrías actualizar totalForms aquí si quieres evitar huecos
+                const deleteCheckbox = varianteItem.querySelector('input[type="checkbox"][name$="DELETE"]');
+                if (deleteCheckbox) {
+                    deleteCheckbox.checked = true;
+                    varianteItem.style.display = 'none'; // Oculta el formulario
+                } else {
+                    // Si no hay checkbox (formulario nuevo), simplemente elimínalo del DOM
+                    varianteItem.remove();
+                    // Opcional: podrías actualizar totalForms aquí si quieres evitar huecos
+                }
             }
         }
     });

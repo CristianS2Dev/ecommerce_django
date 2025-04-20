@@ -18,7 +18,7 @@
     {% else %}
         <h1>Agregar Marca</h1>
     {% endif %}
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" class="mb-2">
         {% csrf_token %}
         <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" id="visible" name="visible" {% if marca.visible %}checked{% endif %}>
@@ -35,7 +35,7 @@
             <img src="{{ marca.logo.url }}" alt="{{ marca.nombre }}" style="width: 100px;">
             {% endif %}
         </div>
-        {% if dato %}
+        {% if marca %}
         <button type="submit" class="btn btn-success">Guardar Cambios</button>
         <a href="{% url 'list_brands' %}" class="btn btn-secondary">Cancelar</a>
         

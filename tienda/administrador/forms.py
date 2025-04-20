@@ -35,5 +35,7 @@ VarianteFormSet = inlineformset_factory(
     model=Variante,
     form=VarianteForm,
     extra=0,
-    can_delete=True
+    can_delete=True,
+    min_num=0,          # Permitir cero variantes
+    validate_min=False  # No validar mínimo
 )

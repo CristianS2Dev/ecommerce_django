@@ -93,7 +93,21 @@ def agregar_producto(request):
                 # Guardar variantes
                 formset = VarianteFormSet(request.POST, instance=producto)
                 if formset.is_valid():
-                    formset.save()
+                    variantes = formset.save(commit=False)
+                    if not variantes:
+                        # Si no hay variantes, crea una por defecto
+                        Variante.objects.create(
+                            producto=producto,
+                            color="#000000",  # color por defecto
+                            talla="Única",
+                            stock=0
+                        )
+                        messages.info(request, "Se creó una variante por defecto porque no agregaste variantes al producto.")
+                    else:
+                        for variante in variantes:
+                            variante.producto = producto
+                            variante.save()
+                    formset.save_m2m()
                 else:
                     for i, formset_error in enumerate(formset.errors):
                         for field, error in formset_error.items():
@@ -118,7 +132,6 @@ def agregar_producto(request):
                 messages.error(request, f"Error: {e}")
                 formset = VarianteFormSet(request.POST)  # sin instancia
         else:
-            # Si el form no es válido, crea el formset sin instancia
             formset = VarianteFormSet(request.POST)
 
             if form.errors:
@@ -162,20 +175,48 @@ def editar_producto(request, id_producto):
 
     if request.method == "POST":
         form = ProductoForm(request.POST, instance=producto)
-        formset = VarianteFormSet(request.POST or None, instance=producto)
+        formset = VarianteFormSet(request.POST, instance=producto)
 
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             try:
                 form.save()
-
                 # Actualizar etiquetas
                 etiquetas_ids = request.POST.getlist("etiquetas")
                 producto.etiquetas.set(etiquetas_ids)
 
-                # Guardar variantes (sin borrar)
-                formset.save()
+                if formset.is_valid():
+                    variantes = formset.save(commit=False)
+                    # Eliminar variantes marcadas para borrar
+                    for obj in formset.deleted_objects:
+                        obj.delete()
+                    if not variantes and not producto.variantes.exists():
+                        Variante.objects.create(
+                            producto=producto,
+                            color="#000000",
+                            talla="Única",
+                            stock=0
+                        )
+                        messages.info(request, "Se creó una variante por defecto porque no agregaste variantes al producto.")
+                    else:
+                        for variante in variantes:
+                            variante.producto = producto
+                            variante.save()
+                    formset.save_m2m()
+                else:
+                    for i, formset_error in enumerate(formset.errors):
+                        for field, error in formset_error.items():
+                            messages.error(request, f"Error en variante {i+1} - '{field}': {error}")
+                    messages.error(request, "Hay errores en el formulario de variantes.")
+                    return render(request, "productos/agregar_producto.html", {
+                        'form': form,
+                        'formset': formset,
+                        'dato': producto,
+                        'categorias': categorias,
+                        'marcas': marcas,
+                        'etiquetas': etiquetas,
+                    })
 
-                # Agregar nuevas imágenes
+                # Guardar nuevas imágenes
                 imagenes = request.FILES.getlist("imagenes")
                 for imagen in imagenes:
                     ImagenProducto.objects.create(producto=producto, imagen=imagen)
@@ -185,7 +226,7 @@ def editar_producto(request, id_producto):
             except Exception as e:
                 messages.error(request, f"Error: {e}")
         else:
-           # Mostrar errores específicos de los formularios
+            # Mostrar errores específicos de los formularios
             if form.errors:
                 for field, errors in form.errors.items():
                     for error in errors:
@@ -195,6 +236,7 @@ def editar_producto(request, id_producto):
                     for field, error in formset_error.items():
                         messages.error(request, f"Error en variante {i+1} - '{field}': {error}")
             messages.error(request, "Hay errores en el formulario.")
+
     else:
         form = ProductoForm(instance=producto)
         formset = VarianteFormSet(instance=producto)
@@ -216,7 +258,6 @@ def editar_producto(request, id_producto):
         'marca_id': producto.marca.id if producto.marca else None,
         'etiquetas_ids': producto.etiquetas.values_list('id', flat=True),
     })
-
 
 @session_rol_permission(1)
 def eliminar_producto(request, id_producto):

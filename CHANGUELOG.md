@@ -18,6 +18,15 @@
 
 ---
 
+## [v3.2.3-alpha.1] - 20-04-2025
+
+### Changed
+
+- Se refactoriza la estructura del código para mejorar la legibilidad y el mantenimiento.
+
+---
+---
+
 ## [v3.2.3-alpha.1] - 17-04-2025
 
 ### Changed

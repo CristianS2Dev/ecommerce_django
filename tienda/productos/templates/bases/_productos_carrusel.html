@@ -61,12 +61,12 @@
                     </p>
                   {% endif %}
 
-                  {% if request.session.pista.rol == 3 or request.session.pista.rol == 1 %}
+                  <!-- {% if request.session.pista.rol == 3 or request.session.pista.rol == 1 %}
                     <div class="d-grid gap-1 mt-auto">
                       <a href="{% url 'editar_producto' producto.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
                       <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
                     </div>
-                  {% endif %}
+                  {% endif %} -->
                 </div>
               </div>
             </div>
@@ -119,12 +119,12 @@
             </p>
           {% endif %}
 
-          {% if request.session.pista.rol == 3 or request.session.pista.rol == 1 %}
+          <!-- {% if request.session.pista.rol == 3 or request.session.pista.rol == 1 %}
             <div class="d-grid gap-1 mt-auto">
               <a href="{% url 'editar_producto' producto.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
               <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
             </div>
-          {% endif %}
+          {% endif %} -->
         </div>
       </div>
     </div>
