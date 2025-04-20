@@ -24,6 +24,7 @@ class Marca(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
     logo = models.ImageField(upload_to='marcas/logos', blank=True, null=True)
+    visible = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombre

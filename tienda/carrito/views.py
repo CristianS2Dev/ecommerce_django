@@ -91,7 +91,7 @@ def add_item(request, id_producto):
         elemento.cantidad = cantidad
     elemento.save()
 
-    messages.success(request, f"{producto.nombre} ({color}, {talla}) agregado al carrito.")
+    messages.success(request, f"{producto.nombre} agregado al carrito.")
     return redirect('cart')
 
 def update_item(request, id_elemento):
@@ -163,8 +163,8 @@ def checkout_cart(request):
 
     # Actualizar el stock y limpiar el carrito
     for elemento in carrito.elementos.all():
-        elemento.producto.stock = F('stock') - elemento.cantidad
-        elemento.producto.save()
+        variante = elemento.variante
+        variante.stock = F('stock') - elemento.cantidad
+        variante.save()
         elemento.delete()
-
     return redirect('index')

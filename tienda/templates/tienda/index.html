@@ -7,14 +7,16 @@
 
 {% block main %}
 
-<!-- Sección de banners -->
+<!-- Sección Principal de banners -->
 <section>
   <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
       {% for banner in banners_principales %}
       <div class="carousel-item {% if forloop.first %}active{% endif %}">
         <div class="ratio ratio-21x9">
-          <img src="{{ banner.imagen.url }}" class="w-100 h-100 object-fit-cover" alt="Banner {{ forloop.counter }}">
+          <a href="{% url 'list_products' %}">
+            <img src="{{ banner.imagen.url }}" class="w-100 h-100 object-fit-cover" alt="Banner {{ forloop.counter }}">
+          </a>
         </div>
       </div>
       {% endfor %}
@@ -31,7 +33,7 @@
     <h2 class="text-center text-dark">¡Bienvenido a Nuestra Tienda!</h2>
   </div>
 </section>
-<!-- Sección para los productos -->
+<!-- Sección 1 para los productos -->
 <section class="text-center py-5 bg-light">
   <div class="container">
       {% include '../bases/_productos_carrusel.html' %}
@@ -41,7 +43,7 @@
   </div>
 </section>
 
- <!-- Seccion para las marca de los productos -->
+ <!-- Seccion 2 para las marca de los productos -->
  <section class="bg-dark text-center py-4">
   <div class="container">
     <div class="d-flex flex-nowrap overflow-auto gap-4 px-3 marcas-scroll">
@@ -56,15 +58,16 @@
     </div>
   </div>
 </section>
-<!-- Sección de banners secundarios -->
+<!-- Sección 3 de banners secundarios -->
 <section class="text-center position-relative">
   {% if banners_secundarios %}
     <div class="position-relative">
-      <img src="{{ banners_secundarios.0.imagen.url }}"
-           class="d-block w-100"
-           alt="{{ banners_secundarios.0.titulo }}"
-           style="margin-top: 50px; object-fit: cover;">
-           
+      <a href="{% url 'list_products' %}">
+        <img src="{{ banners_secundarios.0.imagen.url }}"
+            class="d-block w-100"
+            alt="{{ banners_secundarios.0.titulo }}"
+            style="margin-top: 50px; object-fit: cover;">
+      </a>           
       <div class="position-absolute top-50 start-50 translate-middle text-center w-100 px-3">
         <h2 class="fw-bold text-primary mb-4 mx-auto w-75 w-md-50 w-lg-25">
           {{ banners_secundarios.0.texto }}
@@ -75,38 +78,37 @@
     <p>No hay banners secundarios disponibles.</p>
   {% endif %}
 </section>
-
- <!-- Sección de "¿Por qué elegirnos?"  -->
+ <!-- Sección 4 de "¿Por qué elegirnos?"  -->
 <section>
-    <div class="container py-5">
-        <h2 class="text-center mb-4">¿Por Qué Elegirnos?</h2>
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-4">
-                <div class="card custom-card text-center">
-                    <div class="custom-icon">⚡</div>
-                    <h4 class="mt-3">Compra Sin Esperas</h4>
-                    <p>Agrega al carrito y chatea con nosotros en WhatsApp. ¡Así de simple!</p>
-                    <button class="custom-btn btn-warning">¡Prueba Ahora!</button>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card custom-card text-center">
-                    <div class="custom-icon">👌</div>
-                    <h4 class="mt-3">Sin Complicaciones</h4>
-                    <p>No más formularios aburridos. Solo selecciona, chatea y compra. ¡Es un paseo!</p>
-                    <button class="custom-btn btn-warning">¡Prueba Ahora!</button>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card custom-card text-center">
-                    <div class="custom-icon">😆</div>
-                    <h4 class="mt-3">Compra Con Risas</h4>
-                    <p>Cada compra es una experiencia divertida. ¡Te prometemos que no te aburrirás!</p>
-                    <button class="custom-btn btn-warning">¡Prueba Ahora!</button>
-                </div>
-            </div>
-        </div>
-    </div>
+  <div class="container py-5">
+      <h2 class="text-center mb-4">¿Por Qué Elegirnos?</h2>
+      <div class="row g-4 justify-content-center">
+          <div class="col-md-4">
+              <div class="card custom-card text-center">
+                  <div class="custom-icon">⚡</div>
+                  <h4 class="mt-3">Compra Sin Esperas</h4>
+                  <p>Agrega al carrito y chatea con nosotros en WhatsApp. ¡Así de simple!</p>
+                  <button class="custom-btn btn-warning">¡Prueba Ahora!</button>
+              </div>
+          </div>
+          <div class="col-md-4">
+              <div class="card custom-card text-center">
+                  <div class="custom-icon">👌</div>
+                  <h4 class="mt-3">Sin Complicaciones</h4>
+                  <p>No más formularios aburridos. Solo selecciona, chatea y compra. ¡Es un paseo!</p>
+                  <button class="custom-btn btn-warning">¡Prueba Ahora!</button>
+              </div>
+          </div>
+          <div class="col-md-4">
+              <div class="card custom-card text-center">
+                  <div class="custom-icon">😆</div>
+                  <h4 class="mt-3">Compra Con Risas</h4>
+                  <p>Cada compra es una experiencia divertida. ¡Te prometemos que no te aburrirás!</p>
+                  <button class="custom-btn btn-warning">¡Prueba Ahora!</button>
+              </div>
+          </div>
+      </div>
+  </div>
 </section>
 
 {% endblock %}

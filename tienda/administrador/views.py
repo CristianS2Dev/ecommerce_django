@@ -236,7 +236,7 @@ def eliminar_producto(request, id_producto):
 def list_brands(request):
     """Lista todas las marcas."""
     q = Marca.objects.all()
-    context = {'data': q}
+    context = {'marcas': q}  
     return render(request, 'marcas/lista_marcas_admin.html', context)
 
 
@@ -253,7 +253,7 @@ def add_brand(request):
             marca = Marca(nombre=nombre, descripcion=descripcion, logo=logo)
             marca.save()
             messages.success(request, 'Marca agregada correctamente')
-            return redirect('list_brands')  # Cambia a la URL adecuada
+            return redirect('list_brands') 
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
@@ -273,20 +273,21 @@ def edit_brand(request, brand_id):
         nombre = request.POST.get("nombre")
         descripcion = request.POST.get("descripcion")
         logo = request.FILES.get("logo")
+        visible = request.POST.get("visible") == "on" 
 
         try:
-            # Actualizar la marca
             marca.nombre = nombre
             marca.descripcion = descripcion
+            marca.visible = visible 
             if logo:
                 marca.logo = logo
             marca.save()
             messages.success(request, 'Marca actualizada correctamente')
-            return redirect('list_brands')  # Cambia a la URL adecuada
+            return redirect('list_brands')
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
-    return render(request, "marcas/editar_marca.html", {'marca': marca})
+    return render(request, "marcas/agregar_marca.html", {'marca': marca})
 
 
 @session_rol_permission(1)
